@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>H&F Exteriors Window Measurement App</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+  window.jsPDF = window.jspdf.jsPDF;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+<script>
+  document.getElementById('type').addEventListener('change', function () {
+    const otherBox = document.getElementById('otherTypeWrapper');
+    if (this.value === 'Other') {
+      otherBox.style.display = 'block';
+      document.getElementById('otherType').focus();
+    } else {
+      otherBox.style.display = 'none';
+      document.getElementById('otherType').value = '';
+    }
+  });
+</script>
+<script>
+  window.jsPDF = window.jspdf.jsPDF;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#9D2235">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    h1 {
+      color: #9D2235;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #5B6770;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #9D2235;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: white;
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M70 90L35 50h70z"/%3E%3C/svg%3E');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+      padding-right: 40px;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      padding: 15px;
+      width: 100%;
+      background: #9D2235;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+
+    .window-entry {
+      background: white;
+      border-left: 5px solid #9D2235;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .final-size {
+      background: white;
+      color: #9D2235;
+      border: 3px solid #9D2235;
+      padding: 15px;
+      margin: 15px 0;
+      text-align: center;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>H&F Exteriors Window Measurement App</h1>
+
+    <label>PO Number *</label>
+    <input type="text" id="poNumber" required>
+
+    <label>Window Location *</label>
+    <input type="text" id="location">
+
+    <label>Window Type *</label>
+<select id="type">
+  <option value="">Select Window Type</option>
+  <option>Single Hung</option>
+  <option>Double Hung</option>
+  <option>Picture</option>
+  <option>Casement</option>
+  <option>Other</option>
+</select>
+<div id="otherTypeWrapper" style="display: none;">
+      <label for="otherType">Specify Other Type *</label>
+      <input type="text" id="otherType">
+    </div>
+
+    <label>Width Top</label><input type="number" step="0.25" id="widthTop">
+    <label>Width Middle</label><input type="number" step="0.25" id="widthMiddle">
+    <label>Width Bottom</label><input type="number" step="0.25" id="widthBottom">
+
+    <label>Height Left</label><input type="number" step="0.25" id="heightLeft">
+    <label>Height Center</label><input type="number" step="0.25" id="heightCenter">
+    <label>Height Right</label><input type="number" step="0.25" id="heightRight">
+
+    <label>Notes</label>
+    <textarea id="notes"></textarea>
+
+    <div class="final-size" id="finalSizeDisplay" style="display: none;">Final Size: <span id="finalSize"></span></div>
+
+    <button onclick="addWindow()">Add Window</button>
+    
+    <button onclick="generatePDF()">Generate PDF</button>
+    
+    <a href="tel:6187919940" style="
+      display: block;
+      text-align: center;
+      background: black;
+      color: white;
+      font-weight: bold;
+      padding: 15px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 10px;">
+      Call Gabe
+    </a>
+  <footer style="text-align: center; font-size: 14px; color: #5B6770; padding: 20px 0;">
+    An H&F Studios Application
+  </footer>
+  <script>
+    const windows = [];
+
+    function formatNumber(num) {
+      return Number(num).toFixed(2);
+    }
+
+    function roundToQuarter(num) {
+      return Math.ceil(num * 4) / 4;
+    }
+
+    const measurementFields = [
+      'widthTop', 'widthMiddle', 'widthBottom',
+      'heightLeft', 'heightCenter', 'heightRight'
+    ];
+
+    measurementFields.forEach(id => {
+      document.getElementById(id).addEventListener('blur', function () {
+        if (this.value) {
+        const parsed = parseFloat(this.value);
+        if (parsed % 0.25 !== 0) {
+          this.setCustomValidity('Please enter a measurement in 0.25 inch increments.');
+          this.reportValidity();
+        } else {
+          this.setCustomValidity('');
+          const rounded = roundToQuarter(parsed);
+          this.value = formatNumber(rounded);
+        }
+      }
+        showFinalSize();
+      });
+    });
+
+    function showFinalSize() {
+      const w = ['widthTop','widthMiddle','widthBottom'].map(id => parseFloat(document.getElementById(id).value));
+      const h = ['heightLeft','heightCenter','heightRight'].map(id => parseFloat(document.getElementById(id).value));
+      const addBtn = document.querySelector('button[onclick="addWindow()"]');
+      if (w.every(Boolean) && h.every(Boolean)) {
+        const minW = Math.min(...w);
+        const minH = Math.min(...h);
+        document.getElementById('finalSize').textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
+        document.getElementById('finalSizeDisplay').style.display = 'block';
+        addBtn.style.backgroundColor = '#4CAF50';
+      } else {
+        document.getElementById('finalSizeDisplay').style.display = 'none';
+      document.getElementById('location').focus();
+        addBtn.style.backgroundColor = '#9D2235';
+      }
+    }\" × ${formatNumber(minH)}\"`;
+        document.getElementById('finalSizeDisplay').style.display = 'block';
+      } else {
+        document.getElementById('finalSizeDisplay').style.display = 'none';
+      }
+    }
+
+    function addWindow() {
+      const po = document.getElementById('poNumber').value.trim();
+      const location = document.getElementById('location').value.trim();
+      let type = document.getElementById('type').value;
+      if (type === 'Other') {
+        const customType = document.getElementById('otherType').value.trim();
+        if (!customType) {
+          alert("Please specify the window type.");
+          return;
+        }
+        type = customType;
+      }
+      const notes = document.getElementById('notes').value.trim();
+
+      if (!po || !location || !type) {
+        alert("Please fill out all required fields.");
+        return;
+      }
+
+      const w = ['widthTop','widthMiddle','widthBottom'].map(id => parseFloat(document.getElementById(id).value));
+      const h = ['heightLeft','heightCenter','heightRight'].map(id => parseFloat(document.getElementById(id).value));
+
+      if (!w.every(Boolean) || !h.every(Boolean)) {
+        alert("Please enter all measurement fields.");
+        return;
+      }
+
+      const entry = {
+        location,
+        type,
+        widthTop: formatNumber(w[0]),
+        widthMiddle: formatNumber(w[1]),
+        widthBottom: formatNumber(w[2]),
+        heightLeft: formatNumber(h[0]),
+        heightCenter: formatNumber(h[1]),
+        heightRight: formatNumber(h[2]),
+        finalWidth: formatNumber(Math.min(...w)),
+        finalHeight: formatNumber(Math.min(...h)),
+        notes
+      };
+
+      windows.push(entry);
+      document.getElementById('entries').innerHTML += `<div class='window-entry'><strong>${entry.location}</strong> - ${entry.type}<br>Final: ${entry.finalWidth}\" × ${entry.finalHeight}\"</div>`;
+
+      document.getElementById('location').value = "";
+      document.getElementById('type').value = "";
+      document.getElementById('notes').value = "";
+      measurementFields.forEach(id => document.getElementById(id).value = "");
+      document.getElementById('finalSizeDisplay').style.display = 'none';
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const po = document.getElementById('poNumber').value.trim();
+      doc.setFontSize(12);
+      doc.text(`PO Number: ${po}`, 35, 20);
+
+      const headers = [[
+        "Location", "Type", "W Top", "W Mid", "W Bot",
+        "H Left", "H Center", "H Right", "Final W", "Final H", "Notes"
+      ]];
+
+      const data = windows.map(w => [
+        w.location, w.type,
+        w.widthTop, w.widthMiddle, w.widthBottom,
+        w.heightLeft, w.heightCenter, w.heightRight,
+        w.finalWidth, w.finalHeight, w.notes
+      ]);
+
+      doc.autoTable({
+        startY: 35,
+        headStyles: {
+          fillColor: [157, 34, 53], // H&F red
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245] // light gray alternate rows
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold' }, // Location
+          1: { fontStyle: 'bold' }, // Type
+          8: { fontStyle: 'bold', textColor: [0, 102, 0] }, // Final Width
+          9: { fontStyle: 'bold', textColor: [0, 102, 0] }  // Final Height
+        },
+        head: headers,
+        body: data,
+        styles: { fontSize: 9, cellPadding: { top: 2, right: 4, bottom: 2, left: 4 } }
+      });
+
+      const pdfBlob = doc.output("blob");
+      const filename = `${po}_Window_Measurements.pdf`;
+      const pdfFile = new File([pdfBlob], filename, { type: "application/pdf" });
+
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        try {
+          await navigator.share({ files: [pdfFile], title: filename });
+        } catch (err) {
+          console.error("Sharing failed", err);
+          doc.save(filename);
+        }
+      } else {
+        doc.save(filename);
+      }
+    }
+  </script>
+</body>
+</html>
