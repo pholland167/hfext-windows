@@ -72,74 +72,76 @@
     </footer>
   </div>
   <script>
-    const windows = [];
+    document.addEventListener('DOMContentLoaded', function () {
+      const windows = [];
 
-    function formatNumber(num) {
-      return Number(num).toFixed(2);
-    }
-
-    function addWindow() {
-      const po = document.getElementById('poNumber').value.trim();
-      const location = document.getElementById('location').value.trim();
-      let type = document.getElementById('type').value;
-      const otherType = document.getElementById('otherType').value.trim();
-      if (type === 'Other' && otherType) {
-        type = otherType;
+      function formatNumber(num) {
+        return Number(num).toFixed(2);
       }
 
-      const notes = document.getElementById('notes').value.trim();
-      const widths = ['widthTop','widthMiddle','widthBottom'].map(id => parseFloat(document.getElementById(id).value));
-      const heights = ['heightLeft','heightCenter','heightRight'].map(id => parseFloat(document.getElementById(id).value));
+      function addWindow() {
+        const po = document.getElementById('poNumber').value.trim();
+        const location = document.getElementById('location').value.trim();
+        let type = document.getElementById('type').value;
+        const otherType = document.getElementById('otherType').value.trim();
+        if (type === 'Other' && otherType) {
+          type = otherType;
+        }
 
-      if (!po || !location || !type || widths.some(isNaN) || heights.some(isNaN)) {
-        alert('Please fill in all required fields and measurements.');
-        return;
-      }
+        const notes = document.getElementById('notes').value.trim();
+        const widths = ['widthTop','widthMiddle','widthBottom'].map(id => parseFloat(document.getElementById(id).value));
+        const heights = ['heightLeft','heightCenter','heightRight'].map(id => parseFloat(document.getElementById(id).value));
 
-      const finalWidth = Math.min(...widths);
-      const finalHeight = Math.min(...heights);
+        if (!po || !location || !type || widths.some(isNaN) || heights.some(isNaN)) {
+          alert('Please fill in all required fields and measurements.');
+          return;
+        }
 
-      const entry = {
-        location,
-        type,
-        widthTop: formatNumber(widths[0]),
-        widthMiddle: formatNumber(widths[1]),
-        widthBottom: formatNumber(widths[2]),
-        heightLeft: formatNumber(heights[0]),
-        heightCenter: formatNumber(heights[1]),
-        heightRight: formatNumber(heights[2]),
-        finalWidth: formatNumber(finalWidth),
-        finalHeight: formatNumber(finalHeight),
-        notes
-      };
+        const finalWidth = Math.min(...widths);
+        const finalHeight = Math.min(...heights);
 
-      windows.push(entry);
-      const entries = document.getElementById('entries');
-      const div = document.createElement('div');
-      div.className = 'window-entry';
-      div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${entry.finalWidth}" × ${entry.finalHeight}"`;
-      entries.appendChild(div);
+        const entry = {
+          location,
+          type,
+          widthTop: formatNumber(widths[0]),
+          widthMiddle: formatNumber(widths[1]),
+          widthBottom: formatNumber(widths[2]),
+          heightLeft: formatNumber(heights[0]),
+          heightCenter: formatNumber(heights[1]),
+          heightRight: formatNumber(heights[2]),
+          finalWidth: formatNumber(finalWidth),
+          finalHeight: formatNumber(finalHeight),
+          notes
+        };
 
-      document.getElementById('location').value = '';
-      document.getElementById('type').value = '';
-      document.getElementById('otherType').value = '';
-      document.getElementById('notes').value = '';
-      ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('finalSizeDisplay').style.display = 'none';
-    }
+        windows.push(entry);
+        const entries = document.getElementById('entries');
+        const div = document.createElement('div');
+        div.className = 'window-entry';
+        div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${entry.finalWidth}" × ${entry.finalHeight}"`;
+        entries.appendChild(div);
 
-    document.getElementById('type').addEventListener('change', function () {
-      const otherBox = document.getElementById('otherTypeWrapper');
-      if (this.value === 'Other') {
-        otherBox.style.display = 'block';
-        document.getElementById('otherType').focus();
-      } else {
-        otherBox.style.display = 'none';
+        document.getElementById('location').value = '';
+        document.getElementById('type').value = '';
         document.getElementById('otherType').value = '';
+        document.getElementById('notes').value = '';
+        ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('finalSizeDisplay').style.display = 'none';
       }
-    });
 
-    document.getElementById('addWindowBtn').addEventListener('click', addWindow);
+      document.getElementById('type').addEventListener('change', function () {
+        const otherBox = document.getElementById('otherTypeWrapper');
+        if (this.value === 'Other') {
+          otherBox.style.display = 'block';
+          document.getElementById('otherType').focus();
+        } else {
+          otherBox.style.display = 'none';
+          document.getElementById('otherType').value = '';
+        }
+      });
+
+      document.getElementById('addWindowBtn').addEventListener('click', addWindow);
+    });
   </script>
 </body>
 </html>
