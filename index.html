@@ -4,7 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>H&F Exteriors Window Measurement App - Internal Use Only</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js">      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
+
+      function showFinalSize() {
+        const w = measurementFields.slice(0, 3).map(id => parseFloat(document.getElementById(id).value));
+        const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
+        if (w.every(val => !isNaN(val)) && h.every(val => !isNaN(val))) {
+          const minW = Math.min(...w);
+          const minH = Math.min(...h);
+          document.getElementById('finalSize').textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
+          document.getElementById('finalSizeDisplay').style.display = 'block';
+        } else {
+          document.getElementById('finalSizeDisplay').style.display = 'none';
+        }
+      }
+
+      measurementFields.forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener('blur', showFinalSize);
+        input.addEventListener('input', showFinalSize);
+      });
+
+</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
