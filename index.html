@@ -7,13 +7,64 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js">      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
 
       function showFinalSize() {
+  const w = measurementFields.slice(0, 3).map(id => parseFloat(document.getElementById(id).value));
+  const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
+
+  if (w.every(val => !isNaN(val)) && h.every(val => !isNaN(val))) {
+    const minW = Math.min(...w.map(roundToEighth));
+    const minH = Math.min(...h.map(roundToEighth));
+    const finalDisplay = document.getElementById('finalSizeDisplay');
+    const finalText = document.getElementById('finalSize');
+
+    finalText.textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
+    finalDisplay.style.display = 'block';
+    finalDisplay.style.backgroundColor = '#4CAF50';
+    finalDisplay.style.color = 'white';
+    finalDisplay.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    document.getElementById('finalSizeDisplay').style.display = 'none';
+  }
+}" × ${formatNumber(minH)}"`;
+          document.getElementById('finalSizeDisplay').style.display = 'block';
+        } else {
+          document.getElementById('finalSizeDisplay').style.display = 'none';
+        }
+      }
+
+      measurementFields.forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener('blur', function () {
+  const value = parseFloat(this.value);
+  if (!isNaN(value)) {
+    const rounded = roundToEighth(value);
+    this.value = formatNumber(rounded);
+  }
+  showFinalSize();
+});
+        input.addEventListener('input', showFinalSize);
+      });
+
+      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
+
+      function roundToEighth(num) {
+  return Math.round(num * 8) / 8;
+}
+
+      function showFinalSize() {
         const w = measurementFields.slice(0, 3).map(id => parseFloat(document.getElementById(id).value));
         const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
+
         if (w.every(val => !isNaN(val)) && h.every(val => !isNaN(val))) {
-          const minW = Math.min(...w);
-          const minH = Math.min(...h);
-          document.getElementById('finalSize').textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
-          document.getElementById('finalSizeDisplay').style.display = 'block';
+          const minW = Math.min(...w.map(roundToQuarter));
+          const minH = Math.min(...h.map(roundToQuarter));
+          const finalDisplay = document.getElementById('finalSizeDisplay');
+          const finalText = document.getElementById('finalSize');
+
+          finalText.textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
+          finalDisplay.style.display = 'block';
+          finalDisplay.style.backgroundColor = '#4CAF50';
+          finalDisplay.style.color = 'white';
+          finalDisplay.scrollIntoView({ behavior: 'smooth' });
         } else {
           document.getElementById('finalSizeDisplay').style.display = 'none';
         }
