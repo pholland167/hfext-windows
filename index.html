@@ -4,191 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>H&F Exteriors Window Measurement App - Internal Use Only</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js">      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
-
-      function showFinalSize() {
-  const w = measurementFields.slice(0, 3).map(id => parseFloat(document.getElementById(id).value));
-  const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
-
-  if (w.every(val => !isNaN(val)) && h.every(val => !isNaN(val))) {
-    const minW = Math.min(...w.map(roundToEighth));
-    const minH = Math.min(...h.map(roundToEighth));
-    const finalDisplay = document.getElementById('finalSizeDisplay');
-    const finalText = document.getElementById('finalSize');
-
-    finalText.textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
-    finalDisplay.style.display = 'block';
-    finalDisplay.style.backgroundColor = '#4CAF50';
-    finalDisplay.style.color = 'white';
-    finalDisplay.scrollIntoView({ behavior: 'smooth' });
-  } else {
-    document.getElementById('finalSizeDisplay').style.display = 'none';
-  }
-}" × ${formatNumber(minH)}"`;
-          document.getElementById('finalSizeDisplay').style.display = 'block';
-        } else {
-          document.getElementById('finalSizeDisplay').style.display = 'none';
-        }
-      }
-
-      measurementFields.forEach(id => {
-        const input = document.getElementById(id);
-        input.addEventListener('blur', function () {
-  const value = parseFloat(this.value);
-  if (!isNaN(value)) {
-    const rounded = roundToEighth(value);
-    this.value = formatNumber(rounded);
-  }
-  showFinalSize();
-});
-        input.addEventListener('input', showFinalSize);
-      });
-
-      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
-
-      function roundToEighth(num) {
-  return Math.round(num * 8) / 8;
-}
-
-      function showFinalSize() {
-        const w = measurementFields.slice(0, 3).map(id => parseFloat(document.getElementById(id).value));
-        const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
-
-        if (w.every(val => !isNaN(val)) && h.every(val => !isNaN(val))) {
-          const minW = Math.min(...w.map(roundToQuarter));
-          const minH = Math.min(...h.map(roundToQuarter));
-          const finalDisplay = document.getElementById('finalSizeDisplay');
-          const finalText = document.getElementById('finalSize');
-
-          finalText.textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
-          finalDisplay.style.display = 'block';
-          finalDisplay.style.backgroundColor = '#4CAF50';
-          finalDisplay.style.color = 'white';
-          finalDisplay.scrollIntoView({ behavior: 'smooth' });
-        } else {
-          document.getElementById('finalSizeDisplay').style.display = 'none';
-        }
-      }
-
-      measurementFields.forEach(id => {
-        const input = document.getElementById(id);
-        input.addEventListener('blur', showFinalSize);
-        input.addEventListener('input', showFinalSize);
-      });
-
-</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#9D2235">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      padding-bottom: 100px;
-    }
-
-    h1 {
-      color: #9D2235;
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 24px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-      color: #5B6770;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 15px;
-      transition: border-color 0.3s;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      outline: none;
-      border-color: #9D2235;
-    }
-
-    select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-color: white;
-      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M70 90L35 50h70z"/%3E%3C/svg%3E');
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 12px;
-      padding-right: 40px;
-      cursor: pointer;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    button {
-      padding: 15px;
-      width: 100%;
-      background: #9D2235;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      border-radius: 8px;
-      font-size: 16px;
-      text-transform: uppercase;
-    }
-
-    .window-entry {
-      background: white;
-      border-left: 5px solid #9D2235;
-      padding: 10px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .final-size {
-      background: white;
-      color: #9D2235;
-      border: 3px solid #9D2235;
-      padding: 15px;
-      margin: 15px 0;
-      text-align: center;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 18px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f5f5; color: #333; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px 20px 100px; }
+    h1 { color: #9D2235; text-align: center; margin-bottom: 30px; font-size: 24px; }
+    label { display: block; margin-bottom: 5px; font-weight: 500; color: #5B6770; }
+    input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 15px; transition: border-color 0.3s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #9D2235; }
+    select { appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: white; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M70 90L35 50h70z"/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; padding-right: 40px; cursor: pointer; }
+    textarea { resize: vertical; min-height: 100px; }
+    button { padding: 15px; width: 100%; background: #9D2235; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 8px; font-size: 16px; text-transform: uppercase; }
+    .window-entry { background: white; border-left: 5px solid #9D2235; padding: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .final-size { background: #f5f5f5; color: #9D2235; border: 3px solid #9D2235; padding: 15px; margin: 15px 0; text-align: center; border-radius: 8px; font-weight: bold; font-size: 18px; display: none; }
   </style>
 </head>
 <body>
@@ -199,10 +32,10 @@
     <input type="text" id="poNumber" required>
 
     <label>Window Location *</label>
-    <input type="text" id="location">
+    <input type="text" id="location" required>
 
     <label>Window Type *</label>
-    <select id="type">
+    <select id="type" required>
       <option value="">Select Window Type</option>
       <option>Single Hung</option>
       <option>Double Hung</option>
@@ -210,104 +43,71 @@
       <option>Casement</option>
       <option>Other</option>
     </select>
-    <div id="otherTypeWrapper" style="display: none;">
+    <div id="otherTypeWrapper" style="display:none;">
       <label for="otherType">Specify Other Type *</label>
       <input type="text" id="otherType">
     </div>
 
-    <label>Width Top</label><input type="number" step="0.25" id="widthTop">
-    <label>Width Middle</label><input type="number" step="0.25" id="widthMiddle">
-    <label>Width Bottom</label><input type="number" step="0.25" id="widthBottom">
+    <label>Width Top</label><input type="number" step="0.125" id="widthTop">
+    <label>Width Middle</label><input type="number" step="0.125" id="widthMiddle">
+    <label>Width Bottom</label><input type="number" step="0.125" id="widthBottom">
 
-    <label>Height Left</label><input type="number" step="0.25" id="heightLeft">
-    <label>Height Center</label><input type="number" step="0.25" id="heightCenter">
-    <label>Height Right</label><input type="number" step="0.25" id="heightRight">
+    <label>Height Left</label><input type="number" step="0.125" id="heightLeft">
+    <label>Height Center</label><input type="number" step="0.125" id="heightCenter">
+    <label>Height Right</label><input type="number" step="0.125" id="heightRight">
 
     <label>Notes</label>
     <textarea id="notes"></textarea>
 
-    <div class="final-size" id="finalSizeDisplay" style="display: none;">Final Size: <span id="finalSize"></span></div>
+    <div class="final-size" id="finalSizeDisplay">Final Size: <span id="finalSize">-- × --</span></div>
 
     <button id="addWindowBtn">Add Window</button>
     <button onclick="generatePDF()">Generate PDF</button>
 
     <div id="entries"></div>
-
-    <a href="tel:6187919940" style="
-      display: block;
-      text-align: center;
-      background: black;
-      color: white;
-      font-weight: bold;
-      padding: 15px;
-      border-radius: 8px;
-      text-decoration: none;
-      margin-top: 10px;">
-      Call Gabe
-    </a>
-    <footer style="text-align: center; font-size: 14px; color: #5B6770; padding: 20px 0;">
-      An H&F Studios Application
-    </footer>
   </div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
       const windows = [];
+      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
 
       function formatNumber(num) {
         return Number(num).toFixed(2);
       }
 
-      function addWindow() {
-        const po = document.getElementById('poNumber').value.trim();
-        const location = document.getElementById('location').value.trim();
-        let type = document.getElementById('type').value;
-        const otherType = document.getElementById('otherType').value.trim();
-        if (type === 'Other' && otherType) {
-          type = otherType;
-        }
-
-        const notes = document.getElementById('notes').value.trim();
-        const widths = ['widthTop','widthMiddle','widthBottom'].map(id => parseFloat(document.getElementById(id).value));
-        const heights = ['heightLeft','heightCenter','heightRight'].map(id => parseFloat(document.getElementById(id).value));
-
-        if (!po || !location || !type || widths.some(isNaN) || heights.some(isNaN)) {
-          alert('Please fill in all required fields and measurements.');
-          return;
-        }
-
-        const finalWidth = Math.min(...widths);
-        const finalHeight = Math.min(...heights);
-
-        const entry = {
-          location,
-          type,
-          widthTop: formatNumber(widths[0]),
-          widthMiddle: formatNumber(widths[1]),
-          widthBottom: formatNumber(widths[2]),
-          heightLeft: formatNumber(heights[0]),
-          heightCenter: formatNumber(heights[1]),
-          heightRight: formatNumber(heights[2]),
-          finalWidth: formatNumber(finalWidth),
-          finalHeight: formatNumber(finalHeight),
-          notes
-        };
-
-        windows.push(entry);
-        const entries = document.getElementById('entries');
-        const div = document.createElement('div');
-        div.className = 'window-entry';
-        div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${entry.finalWidth}" × ${entry.finalHeight}"`;
-        entries.appendChild(div);
-
-        document.getElementById('location').value = '';
-        document.getElementById('type').value = '';
-        document.getElementById('otherType').value = '';
-        document.getElementById('notes').value = '';
-        ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('finalSizeDisplay').style.display = 'none';
+      function roundToEighth(num) {
+        return Math.round(num * 8) / 8;
       }
 
-      document.getElementById('type').addEventListener('change', function () {
+      function showFinalSize() {
+        const w = measurementFields.slice(0,3).map(id => parseFloat(document.getElementById(id).value));
+        const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
+        if (w.every(v => !isNaN(v)) && h.every(v => !isNaN(v))) {
+          const minW = Math.min(...w.map(roundToEighth));
+          const minH = Math.min(...h.map(roundToEighth));
+          const display = document.getElementById('finalSizeDisplay');
+          document.getElementById('finalSize').textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
+          display.style.display = 'block';
+          display.style.backgroundColor = '#4CAF50';
+          display.style.color = 'white';
+          display.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          document.getElementById('finalSizeDisplay').style.display = 'none';
+        }
+      }
+
+      measurementFields.forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener('blur', function() {
+          const val = parseFloat(this.value);
+          if (!isNaN(val)) this.value = formatNumber(roundToEighth(val));
+          showFinalSize();
+        });
+        input.addEventListener('input', showFinalSize);
+      });
+
+      document.getElementById('type').addEventListener('change', function() {
         const otherBox = document.getElementById('otherTypeWrapper');
         if (this.value === 'Other') {
           otherBox.style.display = 'block';
@@ -318,7 +118,49 @@
         }
       });
 
-      document.getElementById('addWindowBtn').addEventListener('click', addWindow);
+      document.getElementById('addWindowBtn').addEventListener('click', function() {
+        const po = document.getElementById('poNumber').value.trim();
+        const loc = document.getElementById('location').value.trim();
+        let type = document.getElementById('type').value;
+        const custom = document.getElementById('otherType').value.trim();
+        if (type === 'Other' && custom) type = custom;
+
+        const notes = document.getElementById('notes').value.trim();
+        const widths = measurementFields.slice(0,3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
+        const heights = measurementFields.slice(3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
+
+        if (!po || !loc || !type || widths.some(isNaN) || heights.some(isNaN)) {
+          alert('Please fill in all required fields and measurements.'); return;
+        }
+
+        const entry = {
+          location: loc,
+          type,
+          widthTop: formatNumber(widths[0]),
+          widthMiddle: formatNumber(widths[1]),
+          widthBottom: formatNumber(widths[2]),
+          heightLeft: formatNumber(heights[0]),
+          heightCenter: formatNumber(heights[1]),
+          heightRight: formatNumber(heights[2]),
+          finalWidth: formatNumber(Math.min(...widths)),
+          finalHeight: formatNumber(Math.min(...heights)),
+          notes
+        };
+
+        windows.push(entry);
+        const div = document.createElement('div');
+        div.className = 'window-entry';
+        div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${entry.finalWidth}" × ${entry.finalHeight}"`;
+        document.getElementById('entries').appendChild(div);
+
+        // reset form
+        document.getElementById('location').value = '';
+        document.getElementById('type').value = '';
+        document.getElementById('otherType').value = '';
+        document.getElementById('notes').value = '';
+        measurementFields.forEach(id => document.getElementById(id).value = '');
+        document.getElementById('finalSizeDisplay').style.display = 'none';
+      });
     });
   </script>
 </body>
