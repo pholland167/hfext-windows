@@ -26,7 +26,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v17</h1>
+    <h1>H&F Exteriors Window Measurement App - v18</h1>
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
     <label>Window Location *</label>
@@ -110,10 +110,25 @@
           showFinalSize();
         });
       });
-      document.getElementById('type').addEventListener('change',e=>{
-        const other=document.getElementById('otherTypeWrapper');
-        if(e.target.value==='Other') other.style.display='block'; else {other.style.display='none'; document.getElementById('otherType').value='';}
-      });
+      // Show/hide "Other Type" field
+      function toggleOtherType() {
+        const typeSel = document.getElementById('type');
+        const wrapper = document.getElementById('otherTypeWrapper');
+        const otherInput = document.getElementById('otherType');
+        if (typeSel.value === 'Other') {
+          wrapper.style.display = 'block';
+          otherInput.required = true;
+          otherInput.focus();
+        } else {
+          wrapper.style.display = 'none';
+          otherInput.required = false;
+          otherInput.value = '';
+        }
+      }
+      const typeSelect = document.getElementById('type');
+      typeSelect.addEventListener('change', toggleOtherType);
+      // Initialize on load
+      toggleOtherType();
       document.getElementById('addWindowBtn').addEventListener('click',()=>{
         const po=document.getElementById('poNumber').value.trim();
         const loc=document.getElementById('location').value.trim();
