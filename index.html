@@ -26,7 +26,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v10</h1>
+    <h1>H&F Exteriors Window Measurement App - Internal Use Only</h1>
 
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
@@ -72,22 +72,31 @@
       const windows = [];
       const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
 
-      function formatNumber(num) {
-        return Number(num).toFixed(2);
-      }
-
       function roundToEighth(num) {
         return Math.round(num * 8) / 8;
       }
 
+      function formatFraction(num) {
+        const whole = Math.floor(num);
+        let fraction = Math.round((num - whole) * 8);
+        const denominator = 8;
+        if (fraction === 0) return `${whole}`;
+        if (fraction === denominator) return `${whole + 1}`;
+        const gcd = (a, b) => b ? gcd(b, a % b) : a;
+        const divisor = gcd(fraction, denominator);
+        fraction /= divisor;
+        const denom = denominator / divisor;
+        return whole > 0 ? `${whole} ${fraction}/${denom}` : `${fraction}/${denom}`;
+      }
+
       function showFinalSize() {
-        const w = measurementFields.slice(0,3).map(id => parseFloat(document.getElementById(id).value));
-        const h = measurementFields.slice(3).map(id => parseFloat(document.getElementById(id).value));
+        const w = measurementFields.slice(0,3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
+        const h = measurementFields.slice(3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
         if (w.every(v => !isNaN(v)) && h.every(v => !isNaN(v))) {
-          const minW = Math.min(...w.map(roundToEighth));
-          const minH = Math.min(...h.map(roundToEighth));
+          const minW = Math.min(...w);
+          const minH = Math.min(...h);
           const display = document.getElementById('finalSizeDisplay');
-          document.getElementById('finalSize').textContent = `${formatNumber(minW)}" × ${formatNumber(minH)}"`;
+          document.getElementById('finalSize').textContent = `${formatFraction(minW)}" × ${formatFraction(minH)}"`;
           display.style.display = 'block';
           display.style.backgroundColor = '#4CAF50';
           display.style.color = 'white';
@@ -101,7 +110,7 @@
         const input = document.getElementById(id);
         input.addEventListener('blur', function() {
           const val = parseFloat(this.value);
-          if (!isNaN(val)) this.value = formatNumber(roundToEighth(val));
+          if (!isNaN(val)) this.value = formatFraction(roundToEighth(val));
           showFinalSize();
         });
         input.addEventListener('input', showFinalSize);
@@ -125,7 +134,6 @@
         const custom = document.getElementById('otherType').value.trim();
         if (type === 'Other' && custom) type = custom;
 
-        const notes = document.getElementById('notes').value.trim();
         const widths = measurementFields.slice(0,3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
         const heights = measurementFields.slice(3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
 
@@ -133,27 +141,21 @@
           alert('Please fill in all required fields and measurements.'); return;
         }
 
+        const minW = Math.min(...widths);
+        const minH = Math.min(...heights);
         const entry = {
           location: loc,
           type,
-          widthTop: formatNumber(widths[0]),
-          widthMiddle: formatNumber(widths[1]),
-          widthBottom: formatNumber(widths[2]),
-          heightLeft: formatNumber(heights[0]),
-          heightCenter: formatNumber(heights[1]),
-          heightRight: formatNumber(heights[2]),
-          finalWidth: formatNumber(Math.min(...widths)),
-          finalHeight: formatNumber(Math.min(...heights)),
-          notes
+          finalWidth: minW,
+          finalHeight: minH
         };
 
         windows.push(entry);
         const div = document.createElement('div');
         div.className = 'window-entry';
-        div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${entry.finalWidth}" × ${entry.finalHeight}"`;
+        div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${formatFraction(entry.finalWidth)}" × ${formatFraction(entry.finalHeight)}"`;
         document.getElementById('entries').appendChild(div);
 
-        // reset form
         document.getElementById('location').value = '';
         document.getElementById('type').value = '';
         document.getElementById('otherType').value = '';
