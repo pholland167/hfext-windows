@@ -21,12 +21,12 @@
     textarea { resize: vertical; min-height: 100px; }
     button { padding: 15px; width: 100%; background: #9D2235; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 8px; font-size: 16px; text-transform: uppercase; }
     .window-entry { background: white; border-left: 5px solid #9D2235; padding: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .final-size { background: #f5f5f5; color: #9D2235; border: 3px solid #9D2235; padding: 15px; margin: 15px 0; text-align: center; border-radius: 8px; font-weight: bold; font-size: 18px; display: none; }
+    .final-size { background: #4CAF50; color: white; border: 3px solid #4CAF50; padding: 15px; margin: 15px 0; text-align: center; border-radius: 8px; font-weight: bold; font-size: 18px; display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v14</h1>
+    <h1>H&F Exteriors Window Measurement App - v15</h1>
 
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
@@ -72,13 +72,12 @@
     <div class="final-size" id="finalSizeDisplay">Final Size: <span id="finalSize">-- × --</span></div>
 
     <button id="addWindowBtn">Add Window</button>
-    <button onclick="generatePDF()">Generate PDF</button>
+    <button id="generatePDFBtn">Generate PDF</button>
 
     <div id="entries"></div>
   </div>
 
   <script>
-    // global windows array
     const windows = [];
     document.addEventListener('DOMContentLoaded', function() {
       const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
@@ -120,19 +119,16 @@
         if (w.every(v => !isNaN(v)) && h.every(v => !isNaN(v))) {
           const minW = Math.min(...w);
           const minH = Math.min(...h);
-          const display = document.getElementById('finalSizeDisplay');
           document.getElementById('finalSize').textContent = `${formatFraction(minW)}" × ${formatFraction(minH)}"`;
+          const display = document.getElementById('finalSizeDisplay');
           display.style.display = 'block';
-          display.style.backgroundColor = '#4CAF50';
-          display.style.color = 'white';
-          display.scrollIntoView({ behavior: 'smooth' });
         } else {
           document.getElementById('finalSizeDisplay').style.display = 'none';
         }
       }
 
       measurementFields.forEach(id => {
-        const input = document.getElementById?id);
+        const input = document.getElementById(id);
         input.addEventListener('blur', function() {
           const val = parseFractionInput(this.value);
           if (!isNaN(val)) this.value = formatFraction(roundToEighth(val));
@@ -190,29 +186,31 @@
         measurementFields.forEach(id => document.getElementById(id).value = '');
         document.getElementById('finalSizeDisplay').style.display = 'none';
       });
-    });
 
-    // Generate PDF globally accessible
-    window.generatePDF = function() {
-      if (windows.length === 0) {
-        alert('No window entries to generate PDF.');
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const po = document.getElementById('poNumber').value.trim();
-      doc.setFontSize(12);
-      doc.text(`PO Number: ${po}`, 14, 20);
-      const headers = [['Location','Type','W Top','W Mid','W Bot','H Left','H Center','H Right','Final W','Final H','Notes']];
-      const body = windows.map(w => [
-        w.location, w.type,
-        formatFraction(w.widthTop), formatFraction(w.widthMiddle), formatFraction(w.widthBottom),
-        formatFraction(w.heightLeft), formatFraction(w.heightCenter), formatFraction(w.heightRight),
-        formatFraction(w.finalWidth), formatFraction(w.finalHeight), w.notes || ''
-      ]);
-      doc.autoTable({ startY: 30, head: headers, body, headStyles:{fillColor:[157,34,53],textColor:255}, styles:{fontSize:8,cellPadding:2} });
-      doc.save(`${po}_Window_Measurements.pdf`);
-    };
+      // PDF generator inside DOMContentLoaded so it sees formatFraction and windows
+      document.getElementById('generatePDFBtn').addEventListener('click', function() {
+        if (windows.length === 0) {
+          alert('No window entries to generate PDF.'); return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const po = document.getElementById('poNumber').value.trim();
+        doc.setFontSize(12);
+        doc.text(`PO Number: ${po}`, 14, 20);
+        const headers = [[
+          'Location','Type','W Top','W Mid','W Bot',
+          'H Left','H Center','H Right','Final W','Final H','Notes'
+        ]];
+        const body = windows.map(w => [
+          w.location, w.type,
+          formatFraction(w.widthTop), formatFraction(w.widthMiddle), formatFraction(w.widthBottom),
+          formatFraction(w.heightLeft), formatFraction(w.heightCenter), formatFraction(w.heightRight),
+          formatFraction(w.finalWidth), formatFraction(w.finalHeight), w.notes || ''
+        ]);
+        doc.autoTable({ startY: 30, head: headers, body, headStyles:{fillColor:[157,34,53],textColor:255}, styles:{fontSize:8,cellPadding:2} });
+        doc.save(`${po}_Window_Measurements.pdf`);
+      });
+    });
   </script>
 </body>
 </html>
