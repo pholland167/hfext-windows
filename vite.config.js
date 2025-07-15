@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.js',
+      srcDir: 'public',       // look for sw.js here
+      filename: 'sw.js',      // service worker filename
       manifest: {}
     })
   ]
