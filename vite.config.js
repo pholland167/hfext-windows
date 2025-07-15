@@ -8,10 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      strategies: 'injectManifest',
-      srcDir: 'public',       // look for sw.js here
-      filename: 'sw.js',      // service worker filename
-      manifest: {}
+      strategies: 'generateSW',    // auto-generate the SW
+      manifest: {
+        /* you can copy fields from your manifest.json here if desired */
+      }
     })
   ]
 });
