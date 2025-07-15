@@ -15,7 +15,7 @@
     .container { max-width: 600px; margin: 0 auto; padding: 20px 20px 100px; }
     h1 { color: #9D2235; text-align: center; margin-bottom: 30px; font-size: 24px; }
     label { display: block; margin-bottom: 5px; font-weight: 500; color: #5B6770; }
-    input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 15px; transition: border-color 0.3s; }
+    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 15px; transition: border-color 0.3s; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #9D2235; }
     select { appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: white; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M70 90L35 50h70z"/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; padding-right: 40px; cursor: pointer; }
     textarea { resize: vertical; min-height: 100px; }
@@ -26,7 +26,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v12</h1>
+    <h1>H&F Exteriors Window Measurement App - Internal Use Only</h1>
 
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
@@ -48,13 +48,23 @@
       <input type="text" id="otherType">
     </div>
 
-    <label>Width Top</label><input type="text" id="widthTop" placeholder="e.g. 2 1/8">
-    <label>Width Middle</label><input type="text" id="widthMiddle" placeholder="e.g. 2 1/8">
-    <label>Width Bottom</label><input type="text" id="widthBottom" placeholder="e.g. 2 1/8">
+    <label>Width Top</label>
+    <input type="text" id="widthTop" inputmode="decimal" placeholder="e.g. 2 1/8">
 
-    <label>Height Left</label><input type="text" id="heightLeft" placeholder="e.g. 2 1/8">
-    <label>Height Center</label><input type="text" id="heightCenter" placeholder="e.g. 2 1/8">
-    <label>Height Right</label><input type="text" id="heightRight" placeholder="e.g. 2 1/8">
+    <label>Width Middle</label>
+    <input type="text" id="widthMiddle" inputmode="decimal" placeholder="e.g. 2 1/8">
+
+    <label>Width Bottom</label>
+    <input type="text" id="widthBottom" inputmode="decimal" placeholder="e.g. 2 1/8">
+
+    <label>Height Left</label>
+    <input type="text" id="heightLeft" inputmode="decimal" placeholder="e.g. 2 1/8">
+
+    <label>Height Center</label>
+    <input type="text" id="heightCenter" inputmode="decimal" placeholder="e.g. 2 1/8">
+
+    <label>Height Right</label>
+    <input type="text" id="heightRight" inputmode="decimal" placeholder="e.g. 2 1/8">
 
     <label>Notes</label>
     <textarea id="notes"></textarea>
@@ -109,12 +119,27 @@
       measurementFields.forEach(id => {
         const input = document.getElementById(id);
         input.addEventListener('blur', function() {
-          const val = parseFloat(this.value);
+          // parse fraction input like "2 1/8" or decimal
+          const val = parseFractionInput(this.value);
           if (!isNaN(val)) this.value = formatFraction(roundToEighth(val));
           showFinalSize();
         });
         input.addEventListener('input', showFinalSize);
       });
+
+      function parseFractionInput(str) {
+        const parts = str.trim().split(' ');
+        if (parts.length === 2) {
+          const whole = parseInt(parts[0], 10);
+          const fracParts = parts[1].split('/');
+          if (fracParts.length === 2) {
+            const num = parseInt(fracParts[0], 10);
+            const den = parseInt(fracParts[1], 10);
+            return whole + (num/den);
+          }
+        }
+        return parseFloat(str);
+      }
 
       document.getElementById('type').addEventListener('change', function() {
         const otherBox = document.getElementById('otherTypeWrapper');
@@ -134,8 +159,8 @@
         const custom = document.getElementById('otherType').value.trim();
         if (type === 'Other' && custom) type = custom;
 
-        const widths = measurementFields.slice(0,3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
-        const heights = measurementFields.slice(3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
+        const widths = measurementFields.slice(0,3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
+        const heights = measurementFields.slice(3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
 
         if (!po || !loc || !type || widths.some(isNaN) || heights.some(isNaN)) {
           alert('Please fill in all required fields and measurements.'); return;
