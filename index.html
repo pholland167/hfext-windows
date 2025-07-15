@@ -26,7 +26,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v13</h1>
+    <h1>H&F Exteriors Window Measurement App - v14</h1>
 
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
@@ -78,8 +78,9 @@
   </div>
 
   <script>
+    // global windows array
+    const windows = [];
     document.addEventListener('DOMContentLoaded', function() {
-      const windows = [];
       const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
 
       function roundToEighth(num) {
@@ -99,9 +100,23 @@
         return whole > 0 ? `${whole} ${fraction}/${denom}` : `${fraction}/${denom}`;
       }
 
+      function parseFractionInput(str) {
+        const parts = str.trim().split(' ');
+        if (parts.length === 2) {
+          const whole = parseInt(parts[0], 10);
+          const fracParts = parts[1].split('/');
+          if (fracParts.length === 2) {
+            const num = parseInt(fracParts[0], 10);
+            const den = parseInt(fracParts[1], 10);
+            return whole + (num/den);
+          }
+        }
+        return parseFloat(str);
+      }
+
       function showFinalSize() {
-        const w = measurementFields.slice(0,3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
-        const h = measurementFields.slice(3).map(id => roundToEighth(parseFloat(document.getElementById(id).value)));
+        const w = measurementFields.slice(0,3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
+        const h = measurementFields.slice(3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
         if (w.every(v => !isNaN(v)) && h.every(v => !isNaN(v))) {
           const minW = Math.min(...w);
           const minH = Math.min(...h);
@@ -117,29 +132,14 @@
       }
 
       measurementFields.forEach(id => {
-        const input = document.getElementById(id);
+        const input = document.getElementById?id);
         input.addEventListener('blur', function() {
-          // parse fraction input like "2 1/8" or decimal
           const val = parseFractionInput(this.value);
           if (!isNaN(val)) this.value = formatFraction(roundToEighth(val));
           showFinalSize();
         });
         input.addEventListener('input', showFinalSize);
       });
-
-      function parseFractionInput(str) {
-        const parts = str.trim().split(' ');
-        if (parts.length === 2) {
-          const whole = parseInt(parts[0], 10);
-          const fracParts = parts[1].split('/');
-          if (fracParts.length === 2) {
-            const num = parseInt(fracParts[0], 10);
-            const den = parseInt(fracParts[1], 10);
-            return whole + (num/den);
-          }
-        }
-        return parseFloat(str);
-      }
 
       document.getElementById('type').addEventListener('change', function() {
         const otherBox = document.getElementById('otherTypeWrapper');
@@ -161,6 +161,7 @@
 
         const widths = measurementFields.slice(0,3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
         const heights = measurementFields.slice(3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
+        const notes = document.getElementById('notes').value.trim();
 
         if (!po || !loc || !type || widths.some(isNaN) || heights.some(isNaN)) {
           alert('Please fill in all required fields and measurements.'); return;
@@ -171,8 +172,9 @@
         const entry = {
           location: loc,
           type,
-          finalWidth: minW,
-          finalHeight: minH
+          widthTop: widths[0], widthMiddle: widths[1], widthBottom: widths[2],
+          heightLeft: heights[0], heightCenter: heights[1], heightRight: heights[2],
+          finalWidth: minW, finalHeight: minH, notes
         };
 
         windows.push(entry);
@@ -189,6 +191,28 @@
         document.getElementById('finalSizeDisplay').style.display = 'none';
       });
     });
+
+    // Generate PDF globally accessible
+    window.generatePDF = function() {
+      if (windows.length === 0) {
+        alert('No window entries to generate PDF.');
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const po = document.getElementById('poNumber').value.trim();
+      doc.setFontSize(12);
+      doc.text(`PO Number: ${po}`, 14, 20);
+      const headers = [['Location','Type','W Top','W Mid','W Bot','H Left','H Center','H Right','Final W','Final H','Notes']];
+      const body = windows.map(w => [
+        w.location, w.type,
+        formatFraction(w.widthTop), formatFraction(w.widthMiddle), formatFraction(w.widthBottom),
+        formatFraction(w.heightLeft), formatFraction(w.heightCenter), formatFraction(w.heightRight),
+        formatFraction(w.finalWidth), formatFraction(w.finalHeight), w.notes || ''
+      ]);
+      doc.autoTable({ startY: 30, head: headers, body, headStyles:{fillColor:[157,34,53],textColor:255}, styles:{fontSize:8,cellPadding:2} });
+      doc.save(`${po}_Window_Measurements.pdf`);
+    };
   </script>
 </body>
 </html>
