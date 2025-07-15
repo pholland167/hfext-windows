@@ -15,25 +15,22 @@
     .container { max-width: 600px; margin: 0 auto; padding: 20px 20px 100px; }
     h1 { color: #9D2235; text-align: center; margin-bottom: 30px; font-size: 24px; }
     label { display: block; margin-bottom: 5px; font-weight: 500; color: #5B6770; }
-    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 15px; transition: border-color 0.3s; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #9D2235; }
-    select { appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: white; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M70 90L35 50h70z"/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; padding-right: 40px; cursor: pointer; }
+    input, select, textarea, button { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 15px; transition: border-color 0.3s; }
+    button { background: #9D2235; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+    input:focus, select:focus, textarea:focus, button:focus { outline: none; border-color: #9D2235; }
+    select { appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 10 6" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M0 0l5 6 5-6z"/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 10px 6px; }
     textarea { resize: vertical; min-height: 100px; }
-    button { padding: 15px; width: 100%; background: #9D2235; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 8px; font-size: 16px; text-transform: uppercase; }
     .window-entry { background: white; border-left: 5px solid #9D2235; padding: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .final-size { background: #4CAF50; color: white; border: 3px solid #4CAF50; padding: 15px; margin: 15px 0; text-align: center; border-radius: 8px; font-weight: bold; font-size: 18px; display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v16</h1>
-
+    <h1>H&F Exteriors Window Measurement App - v17</h1>
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
-
     <label>Window Location *</label>
     <input type="text" id="location" required>
-
     <label>Window Type *</label>
     <select id="type" required>
       <option value="">Select Window Type</option>
@@ -47,185 +44,112 @@
       <label for="otherType">Specify Other Type *</label>
       <input type="text" id="otherType">
     </div>
-
     <label>Width Top</label>
     <input type="text" id="widthTop" inputmode="decimal" placeholder="e.g. 2 1/8">
-
     <label>Width Middle</label>
     <input type="text" id="widthMiddle" inputmode="decimal" placeholder="e.g. 2 1/8">
-
     <label>Width Bottom</label>
     <input type="text" id="widthBottom" inputmode="decimal" placeholder="e.g. 2 1/8">
-
     <label>Height Left</label>
     <input type="text" id="heightLeft" inputmode="decimal" placeholder="e.g. 2 1/8">
-
     <label>Height Center</label>
     <input type="text" id="heightCenter" inputmode="decimal" placeholder="e.g. 2 1/8">
-
     <label>Height Right</label>
     <input type="text" id="heightRight" inputmode="decimal" placeholder="e.g. 2 1/8">
-
     <label>Notes</label>
-    <textarea id="notes"></textarea>
-
+    <textarea id="notes" placeholder="Additional notes..."></textarea>
     <div class="final-size" id="finalSizeDisplay">Final Size: <span id="finalSize">-- × --</span></div>
-
     <button id="addWindowBtn">Add Window</button>
     <button id="generatePDFBtn">Generate PDF</button>
-
     <div id="entries"></div>
   </div>
-
   <script>
-    const windows = [];
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
+      const windows = [];
       const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
-
-      function roundToEighth(num) {
-        return Math.round(num * 8) / 8;
-      }
-
+      function roundToEighth(num) { return Math.round(num * 8) / 8; }
       function formatFraction(num) {
         const whole = Math.floor(num);
         let fraction = Math.round((num - whole) * 8);
-        const denominator = 8;
+        const denom = 8;
         if (fraction === 0) return `${whole}`;
-        if (fraction === denominator) return `${whole + 1}`;
-        const gcd = (a, b) => b ? gcd(b, a % b) : a;
-        const divisor = gcd(fraction, denominator);
+        if (fraction === denom) return `${whole+1}`;
+        const gcd = (a,b) => b?gcd(b,a%b):a;
+        const divisor = gcd(fraction, denom);
         fraction /= divisor;
-        const denom = denominator / divisor;
-        return whole > 0 ? `${whole} ${fraction}/${denom}` : `${fraction}/${denom}`;
+        const denominator = denom/divisor;
+        return whole>0?`${whole} ${fraction}/${denominator}`:`${fraction}/${denominator}`;
       }
-
       function parseFractionInput(str) {
         const parts = str.trim().split(' ');
-        if (parts.length === 2) {
-          const whole = parseInt(parts[0], 10);
-          const fracParts = parts[1].split('/');
-          if (fracParts.length === 2) {
-            const num = parseInt(fracParts[0], 10);
-            const den = parseInt(fracParts[1], 10);
-            return whole + (num/den);
-          }
+        if (parts.length===2) {
+          const whole=+parts[0];
+          const [num,den] = parts[1].split('/').map(Number);
+          if (!isNaN(whole)&&!isNaN(num)&&!isNaN(den)&&den) return whole+num/den;
         }
         return parseFloat(str);
       }
-
       function showFinalSize() {
-        const w = measurementFields.slice(0,3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
-        const h = measurementFields.slice(3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
-        if (w.every(v => !isNaN(v)) && h.every(v => !isNaN(v))) {
-          const minW = Math.min(...w);
-          const minH = Math.min(...h);
+        const vals = measurementFields.map(id=>parseFractionInput(document.getElementById(id).value));
+        if (vals.every(v=>!isNaN(v))) {
+          const rounded=vals.map(roundToEighth);
+          const minW=Math.min(...rounded.slice(0,3));
+          const minH=Math.min(...rounded.slice(3));
           document.getElementById('finalSize').textContent = `${formatFraction(minW)}" × ${formatFraction(minH)}"`;
-          const display = document.getElementById('finalSizeDisplay');
-          display.style.display = 'block';
+          document.getElementById('finalSizeDisplay').style.display='block';
         } else {
-          document.getElementById('finalSizeDisplay').style.display = 'none';
+          document.getElementById('finalSizeDisplay').style.display='none';
         }
       }
-
-      measurementFields.forEach(id => {
-        const input = document.getElementById(id);
-        input.addEventListener('blur', function() {
-          const val = parseFractionInput(this.value);
-          if (!isNaN(val)) this.value = formatFraction(roundToEighth(val));
+      measurementFields.forEach(id=>{
+        const el=document.getElementById(id);
+        el.addEventListener('input', showFinalSize);
+        el.addEventListener('blur',()=>{
+          const v=parseFractionInput(el.value);
+          if(!isNaN(v)) el.value=formatFraction(roundToEighth(v));
           showFinalSize();
         });
-        input.addEventListener('input', showFinalSize);
       });
-
-      document.getElementById('type').addEventListener('change', function() {
-        const otherBox = document.getElementById('otherTypeWrapper');
-        if (this.value === 'Other') {
-          otherBox.style.display = 'block';
-          document.getElementById('otherType').focus();
-        } else {
-          otherBox.style.display = 'none';
-          document.getElementById('otherType').value = '';
-        }
+      document.getElementById('type').addEventListener('change',e=>{
+        const other=document.getElementById('otherTypeWrapper');
+        if(e.target.value==='Other') other.style.display='block'; else {other.style.display='none'; document.getElementById('otherType').value='';}
       });
-
-      document.getElementById('addWindowBtn').addEventListener('click', function() {
-        const po = document.getElementById('poNumber').value.trim();
-        const loc = document.getElementById('location').value.trim();
-        let type = document.getElementById('type').value;
-        const custom = document.getElementById('otherType').value.trim();
-        if (type === 'Other' && custom) type = custom;
-
-        const widths = measurementFields.slice(0,3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
-        const heights = measurementFields.slice(3).map(id => roundToEighth(parseFractionInput(document.getElementById(id).value)));
-        const notes = document.getElementById('notes').value.trim();
-
-        if (!po || !loc || !type || widths.some(isNaN) || heights.some(isNaN)) {
-          alert('Please fill in all required fields and measurements.'); return;
-        }
-
-        const minW = Math.min(...widths);
-        const minH = Math.min(...heights);
-        const entry = {
-          location: loc,
-          type,
-          widthTop: widths[0], widthMiddle: widths[1], widthBottom: widths[2],
-          heightLeft: heights[0], heightCenter: heights[1], heightRight: heights[2],
-          finalWidth: minW, finalHeight: minH, notes
-        };
-
+      document.getElementById('addWindowBtn').addEventListener('click',()=>{
+        const po=document.getElementById('poNumber').value.trim();
+        const loc=document.getElementById('location').value.trim();
+        let type=document.getElementById('type').value;
+        const custom=document.getElementById('otherType').value.trim();
+        if(type==='Other'&&custom) type=custom;
+        const notes=document.getElementById('notes').value.trim();
+        const vals=measurementFields.map(id=>parseFractionInput(document.getElementById(id).value));
+        if(!po||!loc||!type||vals.some(v=>isNaN(v))) {alert('Fill all fields.');return;}
+        const rounded=vals.map(roundToEighth);
+        const minW=Math.min(...rounded.slice(0,3));
+        const minH=Math.min(...rounded.slice(3));
+        const entry={location:loc,type,widths:rounded.slice(0,3),heights:rounded.slice(3),finalW:minW,finalH:minH,notes};
         windows.push(entry);
-        const div = document.createElement('div');
-        div.className = 'window-entry';
-        div.innerHTML = `<strong>${entry.location}</strong> - ${entry.type}<br>Final: ${formatFraction(entry.finalWidth)}" × ${formatFraction(entry.finalHeight)}"`;
+        const div=document.createElement('div');div.className='window-entry';
+        div.innerHTML=`<strong>${loc}</strong> - ${type}<br>Final: ${formatFraction(minW)}" × ${formatFraction(minH)}"`;
         document.getElementById('entries').appendChild(div);
-
-        document.getElementById('location').value = '';
-        document.getElementById('type').value = '';
-        document.getElementById('otherType').value = '';
-        document.getElementById('notes').value = '';
-        measurementFields.forEach(id => document.getElementById(id).value = '');
-        document.getElementById('finalSizeDisplay').style.display = 'none';
+        ['location','type','otherType','notes',...measurementFields].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('finalSizeDisplay').style.display='none';
       });
-
-      // PDF generator inside DOMContentLoaded so it sees formatFraction and windows
-      document.getElementById('generatePDFBtn').addEventListener('click', async function() {
-        if (windows.length === 0) {
-          alert('No window entries to share PDF.');
-          return;
-        }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const po = document.getElementById('poNumber').value.trim();
-        doc.setFontSize(12);
-        doc.text(`PO Number: ${po}`, 14, 20);
-        const headers = [[
-          'Location','Type','W Top','W Mid','W Bot',
-          'H Left','H Center','H Right','Final W','Final H','Notes'
-        ]];
-        const body = windows.map(w => [
-          w.location, w.type,
-          formatFraction(w.widthTop), formatFraction(w.widthMiddle), formatFraction(w.widthBottom),
-          formatFraction(w.heightLeft), formatFraction(w.heightCenter), formatFraction(w.heightRight),
-          formatFraction(w.finalWidth), formatFraction(w.finalHeight), w.notes || ''
+      document.getElementById('generatePDFBtn').addEventListener('click',async()=>{
+        if(windows.length===0){alert('No entries to export');return;}
+        const {jsPDF}=window.jspdf;const doc=new jsPDF();
+        const po=document.getElementById('poNumber').value.trim();doc.setFontSize(12);doc.text(`PO Number: ${po}`,14,20);
+        const head=[['Loc','Type','W','W','W','H','H','H','FW','FH','Notes']];
+        const body=windows.map(w=>[
+          w.location,w.type,
+          ...w.widths.map(v=>formatFraction(v)),
+          ...w.heights.map(v=>formatFraction(v)),
+          formatFraction(w.finalW),formatFraction(w.finalH),w.notes||''
         ]);
-        doc.autoTable({ startY: 30, head: headers, body, headStyles:{fillColor:[157,34,53],textColor:255}, styles:{fontSize:8,cellPadding:2} });
-
-        const pdfBlob = doc.output('blob');
-        const filename = `${po}_Window_Measurements.pdf`;
-        const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
-
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          try {
-            await navigator.share({ files: [pdfFile], title: filename });
-          } catch (err) {
-            console.error('Share failed', err);
-            doc.save(filename);
-          }
-        } else {
-          doc.save(filename);
-        }
-      });
-        doc.save(`${po}_Window_Measurements.pdf`);
+        doc.autoTable({startY:30,head:head,body:body,headStyles:{fillColor:[157,34,53],textColor:255},styles:{fontSize:8}});
+        const blob=doc.output('blob');const file=new File([blob],`${po}_Window_Measurements.pdf`,{type:'application/pdf'});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          try{await navigator.share({files:[file],title:file.name});}catch{doc.save(file.name);}  
+        } else doc.save(file.name);
       });
     });
   </script>
