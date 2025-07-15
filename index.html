@@ -26,7 +26,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v15</h1>
+    <h1>H&F Exteriors Window Measurement App - v16</h1>
 
     <label>PO Number *</label>
     <input type="text" id="poNumber" required>
@@ -188,9 +188,10 @@
       });
 
       // PDF generator inside DOMContentLoaded so it sees formatFraction and windows
-      document.getElementById('generatePDFBtn').addEventListener('click', function() {
+      document.getElementById('generatePDFBtn').addEventListener('click', async function() {
         if (windows.length === 0) {
-          alert('No window entries to generate PDF.'); return;
+          alert('No window entries to share PDF.');
+          return;
         }
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -208,6 +209,22 @@
           formatFraction(w.finalWidth), formatFraction(w.finalHeight), w.notes || ''
         ]);
         doc.autoTable({ startY: 30, head: headers, body, headStyles:{fillColor:[157,34,53],textColor:255}, styles:{fontSize:8,cellPadding:2} });
+
+        const pdfBlob = doc.output('blob');
+        const filename = `${po}_Window_Measurements.pdf`;
+        const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          try {
+            await navigator.share({ files: [pdfFile], title: filename });
+          } catch (err) {
+            console.error('Share failed', err);
+            doc.save(filename);
+          }
+        } else {
+          doc.save(filename);
+        }
+      });
         doc.save(`${po}_Window_Measurements.pdf`);
       });
     });
