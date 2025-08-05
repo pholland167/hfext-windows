@@ -257,27 +257,29 @@
             setTimeout(() => statusMessage.classList.add('hidden'), 4000);
         };
 
-        const initializeFirebase = async () => {
-            try {
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                if (!firebaseConfig.apiKey) {
-                    showStatusMessage("Firebase is not configured. App is in offline mode.");
-                    return;
-                }
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                onAuthStateChanged(auth, user => console.log(user ? `Signed in: ${user.uid}` : "Signed out."));
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-                showStatusMessage("Could not connect to the database.");
-            }
-        };
+        <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
+    authDomain: "windows-measurments.firebaseapp.com",
+    projectId: "windows-measurments",
+    storageBucket: "windows-measurments.firebasestorage.app",
+    messagingSenderId: "871418252288",
+    appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
+    measurementId: "G-1HPL56D6JT"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 
         const loadPO = () => {
             const poNumber = DOMElements.poNumberInput.value.trim();
