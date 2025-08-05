@@ -38,7 +38,7 @@
     <div class="container mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-[#9D2235]">H&F Exteriors</h1>
-            <p class="text-lg text-gray-600">Window Measurement App - v2.11</p>
+            <p class="text-lg text-gray-600">Window Measurement App - v2.12</p>
         </header>
 
         <!-- Status/Message Area to replace alerts -->
@@ -184,7 +184,7 @@
         let currentPoNumber = null;
         let windows = [];
         let unsubscribe = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hf-exteriors-dev';
+        const appId = 'hf-exteriors-app'; // A unique ID for your app's data
 
         const DOMElements = {
             poNumberInput: document.getElementById('poNumber'),
@@ -257,16 +257,14 @@
             setTimeout(() => statusMessage.classList.add('hidden'), 4000);
         };
 
-        <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
+        const initializeFirebase = async () => {
+            try {
+                // =================================================================
+                // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
+                // =================================================================
+                // This placeholder will not work on your live site.
+                // Get your config from the Firebase console (Project Settings > General).
+              const firebaseConfig = {
     apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
     authDomain: "windows-measurments.firebaseapp.com",
     projectId: "windows-measurments",
@@ -275,11 +273,26 @@
     appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
     measurementId: "G-1HPL56D6JT"
   };
+                };
+                // =================================================================
+                // END OF FIREBASE CONFIGURATION
+                // =================================================================
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+                if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+                    showStatusMessage("Firebase is not configured. Please add your credentials.");
+                    return;
+                }
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                onAuthStateChanged(auth, user => console.log(user ? `Signed in: ${user.uid}` : "Signed out."));
+                await signInAnonymously(auth);
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                showStatusMessage("Could not connect to the database.");
+            }
+        };
 
         const loadPO = () => {
             const poNumber = DOMElements.poNumberInput.value.trim();
@@ -372,7 +385,7 @@
 
             if (isSimple) {
                 const [w, h] = DOMElements.simpleMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
-                if (isNaN(w) || w <= 0 || isNaN(h) || h <= 0) return showStatusMessage("Please enter valid width and height.");
+                if (isNaN(w) || !(w > 0) || isNaN(h) || !(h > 0)) return showStatusMessage("Please enter valid width and height.");
                 newWindow = {
                     location, type,
                     notes: DOMElements.notesSimpleInput.value.trim(),
@@ -381,7 +394,7 @@
                 };
             } else {
                 const values = DOMElements.detailedMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
-                if (values.some(v => isNaN(v) || v <= 0)) return showStatusMessage("Please fill all measurement fields.");
+                if (values.some(v => isNaN(v) || !(v > 0))) return showStatusMessage("Please fill all measurement fields.");
                 const rounded = values.map(roundToEighth);
                 newWindow = {
                     location, type,
