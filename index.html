@@ -38,7 +38,7 @@
     <div class="container mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-[#9D2235]">H&F Exteriors</h1>
-            <p class="text-lg text-gray-600">Window Measurement App - v2.4</p>
+            <p class="text-lg text-gray-600">Window Measurement App - v2.5</p>
         </header>
 
         <!-- Status/Message Area to replace alerts -->
@@ -293,7 +293,7 @@
                 // =================================================================
                 // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
                 // =================================================================
-               const firebaseConfig = {
+                const firebaseConfig = {
   apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
   authDomain: "windows-measurments.firebaseapp.com",
   projectId: "windows-measurments",
@@ -507,13 +507,13 @@
                 let blockStartY = y;
 
                 // --- Calculate block height before drawing to handle page breaks ---
-                let calculatedHeight = 80; // Initial height for header and final size
-                if (w.transomHeight) calculatedHeight += 25;
-                if (w.widths && w.widths.length > 0) calculatedHeight += 60;
+                let calculatedHeight = 85; // Initial height for header and main info
+                if (w.transomHeight) calculatedHeight += 30;
                 if (w.notes) {
-                    const notesLines = doc.splitTextToSize(w.notes, pageWidth - margin * 2 - 10);
+                    const notesLines = doc.splitTextToSize(w.notes, pageWidth - margin * 2 - 20);
                     calculatedHeight += (notesLines.length * 10) + 25;
                 }
+                if (w.widths && w.widths.length > 0) calculatedHeight += 60;
                 
                 if (y + calculatedHeight > pageHeight - bottomMargin) {
                     doc.addPage();
@@ -522,16 +522,13 @@
                 }
 
                 // --- Draw Block ---
-                // Block Header (Location & Type)
+                // Block Header
                 doc.setFillColor(brandRed[0], brandRed[1], brandRed[2]);
                 doc.rect(margin, y, pageWidth - (margin * 2), 30, 'F');
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(255, 255, 255);
-                doc.text(w.location, margin + 10, y + 20);
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`Type: ${w.type}`, pageWidth - margin - 10, y + 20, { align: 'right' });
+                doc.text(`Window Location: ${w.location}`, margin + 10, y + 20);
                 y += 30;
 
                 // Main content area
@@ -539,14 +536,18 @@
                 doc.rect(margin, y, pageWidth - (margin * 2), calculatedHeight - 30, 'F');
                 y += 15;
 
-                // Final Size - Most Important
+                // Type and Final Size side-by-side
+                const halfWidth = pageWidth / 2;
                 doc.setFontSize(11);
                 doc.setTextColor(midGray[0], midGray[1], midGray[2]);
-                doc.text('Final Size (Width × Height)', pageWidth / 2, y, { align: 'center' });
-                doc.setFontSize(22);
+                doc.text('Type', halfWidth / 2 + margin / 2, y, { align: 'center' });
+                doc.text('Final Size (Width × Height)', halfWidth + halfWidth / 2 - margin/2, y, { align: 'center' });
+                
+                doc.setFontSize(18);
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-                doc.text(`${formatFraction(w.finalW)}" × ${formatFraction(w.finalH)}"`, pageWidth / 2, y + 22, { align: 'center' });
+                doc.text(w.type, halfWidth / 2 + margin / 2, y + 20, { align: 'center' });
+                doc.text(`${formatFraction(w.finalW)}" × ${formatFraction(w.finalH)}"`, halfWidth + halfWidth / 2 - margin/2, y + 20, { align: 'center' });
                 y += 40;
 
                 // Transom Info
@@ -555,9 +556,24 @@
                     doc.setTextColor(midGray[0], midGray[1], midGray[2]);
                     doc.text('Transom', margin + 10, y);
                     doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
                     doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-                    doc.text(`${w.transomShape} - ${formatFraction(w.transomHeight)}"`, margin + 10, y + 14);
-                    y += 25;
+                    doc.text(`Shape: ${w.transomShape}`, margin + 20, y + 14);
+                    doc.text(`Height: ${formatFraction(w.transomHeight)}"`, halfWidth, y + 14);
+                    y += 30;
+                }
+
+                // Notes
+                if (w.notes) {
+                    doc.setFontSize(10);
+                    doc.setTextColor(midGray[0], midGray[1], midGray[2]);
+                    doc.text('Notes', margin + 10, y);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+                    const notesLines = doc.splitTextToSize(w.notes, pageWidth - (margin * 2) - 20);
+                    doc.text(notesLines, margin + 20, y + 14);
+                    y += (notesLines.length * 10) + 15;
                 }
 
                 // Reference Measurements
@@ -566,6 +582,7 @@
                     doc.setTextColor(midGray[0], midGray[1], midGray[2]);
                     doc.text('Reference Measurements', margin + 10, y);
                     doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
                     doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
                     const refText = [
                         `Width Top: ${formatFraction(w.widths[0])}"`,
@@ -582,18 +599,6 @@
                     doc.text(refText[4], pageWidth / 2, y + 26);
                     doc.text(refText[5], pageWidth / 2, y + 38);
                     y += 50;
-                }
-
-                // Notes
-                if (w.notes) {
-                    doc.setFontSize(10);
-                    doc.setTextColor(midGray[0], midGray[1], midGray[2]);
-                    doc.text('Notes', margin + 10, y);
-                    doc.setFontSize(10);
-                    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-                    const notesLines = doc.splitTextToSize(w.notes, pageWidth - (margin * 2) - 20);
-                    doc.text(notesLines, margin + 20, y + 14);
-                    y += (notesLines.length * 10) + 15;
                 }
 
                 y = blockStartY + calculatedHeight + 15; // Move y to the end of the drawn block plus a margin
