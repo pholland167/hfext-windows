@@ -1,171 +1,530 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>H&F Exteriors Window Measurement App - Internal Use Only</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="theme-color" content="#9D2235">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f5f5; color: #333; line-height: 1.6; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px 20px 100px; }
-    h1 { color: #9D2235; text-align: center; margin-bottom: 30px; font-size: 24px; }
-    label { display: block; margin-bottom: 5px; font-weight: 500; color: #5B6770; }
-    input, select, textarea, button { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 15px; transition: border-color 0.3s; }
-    button { background: #9D2235; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-    input:focus, select:focus, textarea:focus, button:focus { outline: none; border-color: #9D2235; }
-    select { appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg viewBox="0 0 10 6" xmlns="http://www.w3.org/2000/svg" fill="%235B6770"%3E%3Cpath d="M0 0l5 6 5-6z"/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 10px 6px; }
-    textarea { resize: vertical; min-height: 100px; }
-    .window-entry { background: white; border-left: 5px solid #9D2235; padding: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .final-size { background: #4CAF50; color: white; border: 3px solid #4CAF50; padding: 15px; margin: 15px 0; text-align: center; border-radius: 8px; font-weight: bold; font-size: 18px; display: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H&F Exteriors - Window Measurement App</title>
+    <!-- Using Tailwind CSS for a modern, responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Using jsPDF and jsPDF-AutoTable for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to complement Tailwind */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; /* Tailwind gray-50 */
+        }
+        /* Custom focus ring color to match the brand */
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            --tw-ring-color: #9D2235;
+            box-shadow: 0 0 0 2px var(--tw-ring-color);
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b3b3b3; }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <h1>H&F Exteriors Window Measurement App - v19</h1>
-    <label>PO Number *</label>
-    <input type="text" id="poNumber" required>
-    <label>Window Location *</label>
-    <input type="text" id="location" required>
-    <label>Window Type *</label>
-    <select id="type" required>
-      <option value="">Select Window Type</option>
-      <option>Single Hung</option>
-      <option>Double Hung</option>
-      <option>Picture</option>
-      <option>Casement</option>
-      <option>Other</option>
-    </select>
-    <div id="otherTypeWrapper" style="display:none;">
-      <label for="otherType">Specify Other Type *</label>
-      <input type="text" id="otherType">
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-[#9D2235]">H&F Exteriors</h1>
+            <p class="text-lg text-gray-600">Window Measurement App - v2.0</p>
+        </header>
+
+        <!-- Status/Message Area to replace alerts -->
+        <div id="statusMessage" class="hidden p-4 mb-6 text-center text-white rounded-lg transition-all duration-300"></div>
+
+        <!-- PO Loading Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">1. Input PO</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="poNumber" placeholder="Enter PO Number" class="flex-grow w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-[#9D2235]">
+                <button id="loadPoBtn" class="w-full sm:w-auto bg-[#9D2235] text-white font-bold py-2 px-6 rounded-lg hover:bg-red-800 transition-colors duration-300 flex items-center justify-center">
+                    <svg id="loadingIcon" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Input PO</span>
+                </button>
+            </div>
+            <p id="currentPoInfo" class="mt-4 text-sm text-gray-500">No PO inputted.</p>
+        </div>
+
+        <!-- Window Entry Form -->
+        <div id="entryForm" class="bg-white p-6 rounded-xl shadow-md mb-8 opacity-50 pointer-events-none">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">2. Add a Window</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <!-- Location and Type are always visible after PO load -->
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-600 mb-1">Window Location *</label>
+                    <input type="text" id="location" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-600 mb-1">Window Type *</label>
+                    <select id="type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="">Select Window Type</option>
+                        <option>Single Hung</option>
+                        <option>Double Hung</option>
+                        <option>Picture</option>
+                        <option>Casement</option>
+                        <option>Round</option>
+                        <option>Half-Round</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div id="otherTypeWrapper" class="hidden md:col-span-2">
+                    <label for="otherType" class="block text-sm font-medium text-gray-600 mb-1">Specify Other Type *</label>
+                    <input type="text" id="otherType" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+            </div>
+
+            <!-- Measurement section, hidden until a type is selected -->
+            <div id="measurementContainer" class="hidden mt-6 border-t pt-6">
+                
+                <!-- Detailed Measurements for standard windows -->
+                <div id="detailedMeasurementContainer" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Detailed Measurements</h3>
+                            <div class="grid grid-cols-3 gap-x-4">
+                                <div>
+                                    <label for="widthTop" class="block text-sm font-medium text-gray-600 mb-1">Width Top</label>
+                                    <input type="text" id="widthTop" inputmode="decimal" placeholder="e.g. 35 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label for="widthMiddle" class="block text-sm font-medium text-gray-600 mb-1">Width Middle</label>
+                                    <input type="text" id="widthMiddle" inputmode="decimal" placeholder="e.g. 35 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label for="widthBottom" class="block text-sm font-medium text-gray-600 mb-1">Width Bottom</label>
+                                    <input type="text" id="widthBottom" inputmode="decimal" placeholder="e.g. 35 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                             <div class="grid grid-cols-3 gap-x-4 mt-4">
+                                <div>
+                                    <label for="heightLeft" class="block text-sm font-medium text-gray-600 mb-1">Height Left</label>
+                                    <input type="text" id="heightLeft" inputmode="decimal" placeholder="e.g. 52 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label for="heightCenter" class="block text-sm font-medium text-gray-600 mb-1">Height Center</label>
+                                    <input type="text" id="heightCenter" inputmode="decimal" placeholder="e.g. 52 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label for="heightRight" class="block text-sm font-medium text-gray-600 mb-1">Height Right</label>
+                                    <input type="text" id="heightRight" inputmode="decimal" placeholder="e.g. 52 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                             <label for="notes" class="block text-sm font-medium text-gray-600 mb-1 mt-7">Notes</label>
+                            <textarea id="notes" placeholder="e.g., Temper glass, full screen..." class="w-full px-4 py-2 border border-gray-300 rounded-lg flex-grow min-h-[100px]"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simple Measurements for Round/Half-Round windows -->
+                <div id="simpleMeasurementContainer" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Overall Measurements</h3>
+                             <div class="grid grid-cols-2 gap-x-4">
+                                <div>
+                                    <label for="widthSimple" class="block text-sm font-medium text-gray-600 mb-1">Width</label>
+                                    <input type="text" id="widthSimple" inputmode="decimal" placeholder="e.g. 36" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label for="heightSimple" class="block text-sm font-medium text-gray-600 mb-1">Height</label>
+                                    <input type="text" id="heightSimple" inputmode="decimal" placeholder="e.g. 36" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                         <div class="flex flex-col">
+                             <label for="notesSimple" class="block text-sm font-medium text-gray-600 mb-1">Notes</label>
+                            <textarea id="notesSimple" placeholder="e.g., Temper glass..." class="w-full px-4 py-2 border border-gray-300 rounded-lg flex-grow min-h-[50px]"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Common elements for all measurement types -->
+                <div id="finalSizeDisplay" class="md:col-span-2 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg hidden mt-4">
+                    <p class="font-semibold">Calculated Final Size: <span id="finalSize" class="text-lg font-bold">-- × --</span></p>
+                </div>
+                <button id="addWindowBtn" class="md:col-span-2 w-full mt-6 bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-300">Save Window</button>
+            </div>
+        </div>
+        
+        <!-- Window Entries List -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">3. Saved Windows</h2>
+            <div id="entries" class="space-y-3">
+                <p class="text-gray-500">No windows added yet for this PO.</p>
+            </div>
+            <button id="generatePDFBtn" class="w-full mt-6 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Export PDF</button>
+        </div>
     </div>
-    <label>Width Top</label>
-    <input type="text" id="widthTop" inputmode="decimal" placeholder="e.g. 2 1/8">
-    <label>Width Middle</label>
-    <input type="text" id="widthMiddle" inputmode="decimal" placeholder="e.g. 2 1/8">
-    <label>Width Bottom</label>
-    <input type="text" id="widthBottom" inputmode="decimal" placeholder="e.g. 2 1/8">
-    <label>Height Left</label>
-    <input type="text" id="heightLeft" inputmode="decimal" placeholder="e.g. 2 1/8">
-    <label>Height Center</label>
-    <input type="text" id="heightCenter" inputmode="decimal" placeholder="e.g. 2 1/8">
-    <label>Height Right</label>
-    <input type="text" id="heightRight" inputmode="decimal" placeholder="e.g. 2 1/8">
-    <label>Notes</label>
-    <textarea id="notes" placeholder="Additional notes..."></textarea>
-    <div class="final-size" id="finalSizeDisplay">Final Size: <span id="finalSize">-- × --</span></div>
-    <button id="addWindowBtn">Add Window</button>
-    <button id="generatePDFBtn">Generate PDF</button>
-    <div id="entries"></div>
-  </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const windows = [];
-      const measurementFields = ['widthTop','widthMiddle','widthBottom','heightLeft','heightCenter','heightRight'];
-      function roundToEighth(num) { return Math.round(num * 8) / 8; }
-      function formatFraction(num) {
-        const whole = Math.floor(num);
-        let fraction = Math.round((num - whole) * 8);
-        const denom = 8;
-        if (fraction === 0) return `${whole}`;
-        if (fraction === denom) return `${whole+1}`;
-        const gcd = (a,b) => b?gcd(b,a%b):a;
-        const divisor = gcd(fraction, denom);
-        fraction /= divisor;
-        const denominator = denom/divisor;
-        return whole>0?`${whole} ${fraction}/${denominator}`:`${fraction}/${denominator}`;
-      }
-      function parseFractionInput(str) {
-        const parts = str.trim().split(' ');
-        if (parts.length===2) {
-          const whole=+parts[0];
-          const [num,den] = parts[1].split('/').map(Number);
-          if (!isNaN(whole)&&!isNaN(num)&&!isNaN(den)&&den) return whole+num/den;
-        }
-        return parseFloat(str);
-      }
-      function showFinalSize() {
-        const vals = measurementFields.map(id=>parseFractionInput(document.getElementById(id).value));
-        if (vals.every(v=>!isNaN(v))) {
-          const rounded=vals.map(roundToEighth);
-          const minW=Math.min(...rounded.slice(0,3));
-          const minH=Math.min(...rounded.slice(3));
-          document.getElementById('finalSize').textContent = `${formatFraction(minW)}" × ${formatFraction(minH)}"`;
-          document.getElementById('finalSizeDisplay').style.display='block';
-        } else {
-          document.getElementById('finalSizeDisplay').style.display='none';
-        }
-      }
-      measurementFields.forEach(id=>{
-        const el=document.getElementById(id);
-        el.addEventListener('input', showFinalSize);
-        el.addEventListener('blur',()=>{
-          const v=parseFractionInput(el.value);
-          if(!isNaN(v)) el.value=formatFraction(roundToEighth(v));
-          showFinalSize();
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        let db, auth;
+        let currentPoNumber = null;
+        let windows = [];
+        let unsubscribe = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hf-exteriors-dev';
+
+        const DOMElements = {
+            poNumberInput: document.getElementById('poNumber'),
+            loadPoBtn: document.getElementById('loadPoBtn'),
+            loadingIcon: document.getElementById('loadingIcon'),
+            currentPoInfo: document.getElementById('currentPoInfo'),
+            entryForm: document.getElementById('entryForm'),
+            statusMessage: document.getElementById('statusMessage'),
+            typeSelect: document.getElementById('type'),
+            otherTypeWrapper: document.getElementById('otherTypeWrapper'),
+            otherTypeInput: document.getElementById('otherType'),
+            measurementContainer: document.getElementById('measurementContainer'),
+            detailedMeasurementContainer: document.getElementById('detailedMeasurementContainer'),
+            simpleMeasurementContainer: document.getElementById('simpleMeasurementContainer'),
+            finalSizeDisplay: document.getElementById('finalSizeDisplay'),
+            finalSizeSpan: document.getElementById('finalSize'),
+            addWindowBtn: document.getElementById('addWindowBtn'),
+            generatePDFBtn: document.getElementById('generatePDFBtn'),
+            entriesContainer: document.getElementById('entries'),
+            locationInput: document.getElementById('location'),
+            notesInput: document.getElementById('notes'),
+            notesSimpleInput: document.getElementById('notesSimple'),
+            detailedMeasurementFields: ['widthTop', 'widthMiddle', 'widthBottom', 'heightLeft', 'heightCenter', 'heightRight'],
+            simpleMeasurementFields: ['widthSimple', 'heightSimple']
+        };
+
+        const parseFractionInput = (str) => {
+            if (!str || typeof str !== 'string') return NaN;
+            str = str.trim();
+            const parts = str.split(' ');
+            let total = 0;
+            if (parts.length > 0 && parts[0].includes('/')) {
+                const [num, den] = parts[0].split('/').map(Number);
+                if (!isNaN(num) && !isNaN(den) && den !== 0) total += num / den;
+            } else if (parts.length > 0) {
+                total += parseFloat(parts[0]);
+            }
+            if (parts.length === 2 && parts[1].includes('/')) {
+                const [num, den] = parts[1].split('/').map(Number);
+                if (!isNaN(num) && !isNaN(den) && den !== 0) total += num / den;
+            }
+            return isNaN(total) ? NaN : total;
+        };
+
+        /**
+         * Rounds a number DOWN to the nearest 1/8th.
+         * @param {number} num The number to round down.
+         * @returns {number} The rounded number.
+         */
+        const roundToEighth = (num) => Math.floor(num * 8) / 8;
+
+        const formatFraction = (num) => {
+            if (isNaN(num) || num === null) return "";
+            const whole = Math.floor(num);
+            let fraction = Math.round((num - whole) * 8); // Using Math.round here for display is standard
+            if (fraction === 0) return `${whole}`;
+            if (fraction === 8) return `${whole + 1}`;
+            const gcd = (a, b) => b ? gcd(b, a % b) : a;
+            const divisor = gcd(fraction, 8);
+            const numerator = fraction / divisor;
+            const denominator = 8 / divisor;
+            return whole > 0 ? `${whole} ${numerator}/${denominator}` : `${numerator}/${denominator}`;
+        };
+
+        const showStatusMessage = (message, isError = true) => {
+            const { statusMessage } = DOMElements;
+            statusMessage.textContent = message;
+            statusMessage.className = `p-4 mb-6 text-center text-white rounded-lg transition-all duration-300 ${isError ? 'bg-red-600' : 'bg-green-600'}`;
+            statusMessage.classList.remove('hidden');
+            setTimeout(() => statusMessage.classList.add('hidden'), 4000);
+        };
+
+        const initializeFirebase = async () => {
+            try {
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                if (!firebaseConfig.apiKey) {
+                    showStatusMessage("Firebase is not configured. App is in offline mode.");
+                    return;
+                }
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                onAuthStateChanged(auth, user => console.log(user ? `Signed in: ${user.uid}` : "Signed out."));
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                showStatusMessage("Could not connect to the database.");
+            }
+        };
+
+        const loadPO = () => {
+            const poNumber = DOMElements.poNumberInput.value.trim();
+            if (!poNumber) return showStatusMessage("Please enter a PO Number.");
+            if (!db) return showStatusMessage("Database not connected. Cannot load PO.");
+
+            if (unsubscribe) unsubscribe();
+            currentPoNumber = poNumber;
+            DOMElements.loadingIcon.classList.remove('hidden');
+            DOMElements.loadPoBtn.disabled = true;
+
+            const collectionPath = `artifacts/${appId}/public/data/measurements/${currentPoNumber}/windows`;
+            const q = query(collection(db, collectionPath));
+
+            unsubscribe = onSnapshot(q, (querySnapshot) => {
+                windows = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWindows();
+                DOMElements.entryForm.classList.remove('opacity-50', 'pointer-events-none');
+                DOMElements.currentPoInfo.textContent = `Loaded PO: ${currentPoNumber}. Found ${windows.length} window(s).`;
+                DOMElements.loadingIcon.classList.add('hidden');
+                DOMElements.loadPoBtn.disabled = false;
+                showStatusMessage(`Successfully loaded PO: ${currentPoNumber}`, false);
+            }, (error) => {
+                console.error("Error fetching PO data: ", error);
+                showStatusMessage("Error fetching data for this PO.");
+                DOMElements.loadingIcon.classList.add('hidden');
+                DOMElements.loadPoBtn.disabled = false;
+            });
+        };
+        
+        const renderWindows = () => {
+            const { entriesContainer, generatePDFBtn } = DOMElements;
+            entriesContainer.innerHTML = windows.length === 0 
+                ? '<p class="text-gray-500">No windows added yet for this PO.</p>'
+                : windows.map(w => `
+                    <div class="bg-gray-50 border-l-4 border-[#9D2235] p-4 rounded-r-md shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-lg text-gray-800">${w.location}</p>
+                                <p class="text-sm text-gray-600">${w.type}</p>
+                            </div>
+                            <p class="font-bold text-xl text-[#9D2235]">${formatFraction(w.finalW)}" × ${formatFraction(w.finalH)}"</p>
+                        </div>
+                        ${w.notes ? `<p class="mt-2 text-sm text-gray-500 italic">Notes: ${w.notes}</p>` : ''}
+                    </div>
+                `).join('');
+            generatePDFBtn.disabled = windows.length === 0;
+        };
+
+        const calculateAndShowFinalSize = () => {
+            const type = DOMElements.typeSelect.value;
+            let finalW, finalH;
+
+            if (['Round', 'Half-Round'].includes(type)) {
+                const [w, h] = DOMElements.simpleMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                if (!isNaN(w) && w > 0 && !isNaN(h) && h > 0) {
+                    finalW = w;
+                    finalH = h;
+                }
+            } else {
+                const values = DOMElements.detailedMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                if (values.every(v => !isNaN(v) && v > 0)) {
+                    const rounded = values.map(roundToEighth);
+                    finalW = Math.min(...rounded.slice(0, 3));
+                    finalH = Math.min(...rounded.slice(3, 6));
+                }
+            }
+            
+            if (finalW && finalH) {
+                // We always round down for the final value, but formatFraction will display it cleanly.
+                DOMElements.finalSizeSpan.textContent = `${formatFraction(roundToEighth(finalW))}" × ${formatFraction(roundToEighth(finalH))}"`;
+                DOMElements.finalSizeDisplay.classList.remove('hidden');
+            } else {
+                DOMElements.finalSizeDisplay.classList.add('hidden');
+            }
+        };
+
+        const saveWindow = async () => {
+            if (!currentPoNumber || !db) return showStatusMessage("Please load a PO before saving a window.");
+
+            const location = DOMElements.locationInput.value.trim();
+            let type = DOMElements.typeSelect.value;
+            const customType = DOMElements.otherTypeInput.value.trim();
+            if (type === 'Other') type = customType;
+
+            if (!location || !type) return showStatusMessage("Please provide a location and window type.");
+
+            let newWindow;
+            const isSimple = ['Round', 'Half-Round'].includes(type);
+
+            if (isSimple) {
+                const [w, h] = DOMElements.simpleMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                if (isNaN(w) || w <= 0 || isNaN(h) || h <= 0) return showStatusMessage("Please enter valid width and height.");
+                newWindow = {
+                    location, type,
+                    notes: DOMElements.notesSimpleInput.value.trim(),
+                    widths: [], heights: [],
+                    finalW: roundToEighth(w), finalH: roundToEighth(h)
+                };
+            } else {
+                const values = DOMElements.detailedMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                if (values.some(v => isNaN(v) || v <= 0)) return showStatusMessage("Please fill all measurement fields.");
+                const rounded = values.map(roundToEighth);
+                newWindow = {
+                    location, type,
+                    notes: DOMElements.notesInput.value.trim(),
+                    widths: rounded.slice(0, 3),
+                    heights: rounded.slice(3, 6),
+                    finalW: Math.min(...rounded.slice(0, 3)),
+                    finalH: Math.min(...rounded.slice(3, 6))
+                };
+            }
+
+            DOMElements.addWindowBtn.disabled = true;
+            DOMElements.addWindowBtn.textContent = 'Saving...';
+
+            try {
+                const collectionPath = `artifacts/${appId}/public/data/measurements/${currentPoNumber}/windows`;
+                await addDoc(collection(db, collectionPath), { ...newWindow, createdAt: serverTimestamp() });
+                showStatusMessage("Window saved successfully!", false);
+                
+                // Clear form for next entry
+                DOMElements.locationInput.value = '';
+                DOMElements.typeSelect.value = '';
+                DOMElements.typeSelect.dispatchEvent(new Event('change')); // Reset UI
+                DOMElements.locationInput.focus();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                showStatusMessage("Failed to save window. Check connection.");
+            } finally {
+                DOMElements.addWindowBtn.disabled = false;
+                DOMElements.addWindowBtn.textContent = 'Save Window';
+            }
+        };
+
+        const generatePDF = async () => {
+            if (windows.length === 0) return showStatusMessage("No windows to export.");
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+            
+            doc.setFontSize(20);
+            doc.setTextColor('#9D2235');
+            doc.text('H&F Exteriors - Window Measurement Report', doc.internal.pageSize.getWidth() / 2, 40, { align: 'center' });
+            doc.setFontSize(12);
+            doc.setTextColor(40);
+            doc.text(`PO Number: ${currentPoNumber}`, 40, 60);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() - 40, 60, { align: 'right' });
+
+            const head = [['Location', 'Type', 'Width Top', 'Width Mid', 'Width Bot', 'Height Left', 'Height Ctr', 'Height Right', 'Final Width', 'Final Height', 'Notes']];
+            
+            const body = windows.map(w => {
+                const isSimple = ['Round', 'Half-Round'].includes(w.type);
+                if (isSimple) {
+                    return [
+                        w.location, w.type,
+                        '', '', '', '', '', '', // Empty placeholders for detailed measurements
+                        formatFraction(w.finalW),
+                        formatFraction(w.finalH),
+                        w.notes || ''
+                    ];
+                } else {
+                    // Ensure widths and heights are arrays before mapping
+                    const widths = Array.isArray(w.widths) ? w.widths : [];
+                    const heights = Array.isArray(w.heights) ? w.heights : [];
+                    return [
+                        w.location, w.type,
+                        ...widths.map(formatFraction),
+                        ...heights.map(formatFraction),
+                        formatFraction(w.finalW),
+                        formatFraction(w.finalH),
+                        w.notes || ''
+                    ];
+                }
+            });
+
+            doc.autoTable({
+                startY: 80, head, body, theme: 'grid',
+                headStyles: { fillColor: [157, 34, 53], textColor: 255, fontStyle: 'bold' },
+                styles: { fontSize: 9, cellPadding: 4 },
+                columnStyles: {
+                    0: { fontStyle: 'bold' },
+                    8: { fontStyle: 'bold', textColor: [0, 100, 0] },
+                    9: { fontStyle: 'bold', textColor: [0, 100, 0] },
+                    10: { cellWidth: 'auto' }
+                }
+            });
+
+            const fileName = `${currentPoNumber}_Window_Measurements.pdf`;
+            const file = new File([doc.output('blob')], fileName, { type: 'application/pdf' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: fileName, text: `Window measurements for PO ${currentPoNumber}` });
+                } catch (error) {
+                    console.log('Share failed, falling back to download.', error);
+                    doc.save(fileName);
+                }
+            } else {
+                doc.save(fileName);
+            }
+        };
+        
+        const handleTypeChange = () => {
+            const type = DOMElements.typeSelect.value;
+            const isOther = type === 'Other';
+            const isSimple = ['Round', 'Half-Round'].includes(type);
+            const isDetailed = ['Single Hung', 'Double Hung', 'Picture', 'Casement', 'Other'].includes(type);
+
+            DOMElements.otherTypeWrapper.classList.toggle('hidden', !isOther);
+            DOMElements.otherTypeInput.required = isOther;
+            if (isOther) DOMElements.otherTypeInput.focus();
+            
+            DOMElements.measurementContainer.classList.toggle('hidden', !type);
+            DOMElements.simpleMeasurementContainer.classList.toggle('hidden', !isSimple);
+            DOMElements.detailedMeasurementContainer.classList.toggle('hidden', !isDetailed);
+            
+            // Clear all inputs on type change to prevent data mix-up
+            [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields].forEach(id => document.getElementById(id).value = '');
+            DOMElements.notesInput.value = '';
+            DOMElements.notesSimpleInput.value = '';
+            DOMElements.otherTypeInput.value = '';
+            DOMElements.finalSizeDisplay.classList.add('hidden');
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFirebase();
+            DOMElements.loadPoBtn.addEventListener('click', loadPO);
+            DOMElements.addWindowBtn.addEventListener('click', saveWindow);
+            DOMElements.generatePDFBtn.addEventListener('click', generatePDF);
+            DOMElements.typeSelect.addEventListener('change', handleTypeChange);
+            
+            const allMeasurementFields = [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields];
+            allMeasurementFields.forEach(id => {
+                const el = document.getElementById(id);
+                el.addEventListener('input', calculateAndShowFinalSize);
+                el.addEventListener('blur', () => {
+                    const val = parseFractionInput(el.value);
+                    if (!isNaN(val)) {
+                        // Display the clean fraction, but the underlying value is the raw decimal
+                        el.value = formatFraction(val); 
+                    }
+                    calculateAndShowFinalSize();
+                });
+            });
         });
-      });
-      function toggleOtherType() {
-        const typeSel = document.getElementById('type');
-        const wrapper = document.getElementById('otherTypeWrapper');
-        const otherInput = document.getElementById('otherType');
-        if (typeSel.value === 'Other') {
-          wrapper.style.display = 'block'; otherInput.required = true; otherInput.focus();
-        } else {
-          wrapper.style.display = 'none'; otherInput.required = false; otherInput.value = '';
-        }
-      }
-      const typeSelect = document.getElementById('type'); typeSelect.addEventListener('change', toggleOtherType); toggleOtherType();
-      document.getElementById('addWindowBtn').addEventListener('click',()=>{
-        const po=document.getElementById('poNumber').value.trim();
-        const loc=document.getElementById('location').value.trim();
-        let type=document.getElementById('type').value; const custom=document.getElementById('otherType').value.trim();
-        if(type==='Other'&&custom) type=custom;
-        const notes=document.getElementById('notes').value.trim();
-        const vals=measurementFields.map(id=>parseFractionInput(document.getElementById(id).value));
-        if(!po||!loc||!type||vals.some(v=>isNaN(v))) {alert('Fill all fields.');return;}
-        const rounded=vals.map(roundToEighth);
-        const minW=Math.min(...rounded.slice(0,3)); const minH=Math.min(...rounded.slice(3));
-        windows.push({location:loc,type,widths:rounded.slice(0,3),heights:rounded.slice(3),finalW:minW,finalH:minH,notes});
-        const div=document.createElement('div');div.className='window-entry';
-        div.innerHTML=`<strong>${loc}</strong> - ${type}<br>Final: ${formatFraction(minW)}" × ${formatFraction(minH)}"`;
-        document.getElementById('entries').appendChild(div);
-        ['location','type','otherType','notes',...measurementFields].forEach(id=>document.getElementById(id).value='');
-        document.getElementById('finalSizeDisplay').style.display='none';
-      });
-      document.getElementById('generatePDFBtn').addEventListener('click',async()=>{
-        if(windows.length===0){alert('No entries');return;}
-        const {jsPDF}=window.jspdf;
-        const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'letter'});
-        const po=document.getElementById('poNumber').value.trim();doc.setFontSize(12);doc.text(`PO Number: ${po}`,14,20);
-        const head=[['Location','Type','W Top','W Mid','W Bot','H Left','H Center','H Right','Final W','Final H','Notes']];
-        const body=windows.map(w=>[
-          w.location,w.type,
-          ...w.widths.map(v=>formatFraction(v)),
-          ...w.heights.map(v=>formatFraction(v)),
-          formatFraction(w.finalW),formatFraction(w.finalH),w.notes||''
-        ]);
-        doc.autoTable({startY:30,head:head,body:body,
-          headStyles:{fillColor:[157,34,53],textColor:255},
-          styles:{fontSize:8},
-          columnStyles:{
-            0:{fontStyle:'bold'},
-            1:{fontStyle:'bold'},
-            8:{fontStyle:'bold'},
-            9:{fontStyle:'bold'}
-          }
-        });
-        const blob=doc.output('blob');const file=new File([blob],`${po}_Window_Measurements.pdf`,{type:'application/pdf'});
-        if(navigator.canShare&&navigator.canShare({files:[file]})){
-          try{await navigator.share({files:[file],title:file.name});}catch{doc.save(file.name);}  
-        } else doc.save(file.name);
-      });
-    });
-  </script>
+
+    </script>
 </body>
 </html>
