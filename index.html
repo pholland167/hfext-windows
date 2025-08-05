@@ -38,7 +38,7 @@
     <div class="container mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-[#9D2235]">H&F Exteriors</h1>
-            <p class="text-lg text-gray-600">Window Measurement App - v2.12</p>
+            <p class="text-lg text-gray-600">Window Measurement App</p>
         </header>
 
         <!-- Status/Message Area to replace alerts -->
@@ -58,6 +58,8 @@
                 </button>
             </div>
             <p id="currentPoInfo" class="mt-4 text-sm text-gray-500">No PO inputted.</p>
+            <!-- Temporary Debugging Info Panel -->
+            <div id="debug-info" class="text-xs text-gray-400 text-left mt-4 p-2 border rounded-md bg-gray-50"></div>
         </div>
 
         <!-- Window Entry Form -->
@@ -177,8 +179,8 @@
     <script type="module">
         // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         let db, auth;
         let currentPoNumber = null;
@@ -193,6 +195,7 @@
             currentPoInfo: document.getElementById('currentPoInfo'),
             entryForm: document.getElementById('entryForm'),
             statusMessage: document.getElementById('statusMessage'),
+            debugInfo: document.getElementById('debug-info'),
             typeSelect: document.getElementById('type'),
             otherTypeWrapper: document.getElementById('otherTypeWrapper'),
             otherTypeInput: document.getElementById('otherType'),
@@ -229,17 +232,12 @@
             return isNaN(total) ? NaN : total;
         };
 
-        /**
-         * Rounds a number DOWN to the nearest 1/8th.
-         * @param {number} num The number to round down.
-         * @returns {number} The rounded number.
-         */
         const roundToEighth = (num) => Math.floor(num * 8) / 8;
 
         const formatFraction = (num) => {
             if (isNaN(num) || num === null) return "";
             const whole = Math.floor(num);
-            let fraction = Math.round((num - whole) * 8); // Using Math.round here for display is standard
+            let fraction = Math.round((num - whole) * 8);
             if (fraction === 0) return `${whole}`;
             if (fraction === 8) return `${whole + 1}`;
             const gcd = (a, b) => b ? gcd(b, a % b) : a;
@@ -258,12 +256,13 @@
         };
 
         const initializeFirebase = async () => {
+            const debug = (msg) => DOMElements.debugInfo.innerHTML += `${msg}<br>`;
             try {
+                debug("1. Initializing Firebase...");
+                
                 // =================================================================
                 // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
                 // =================================================================
-                // This placeholder will not work on your live site.
-                // Get your config from the Firebase console (Project Settings > General).
               const firebaseConfig = {
     apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
     authDomain: "windows-measurments.firebaseapp.com",
@@ -273,24 +272,37 @@
     appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
     measurementId: "G-1HPL56D6JT"
   };
-                };
-                // =================================================================
-                // END OF FIREBASE CONFIGURATION
                 // =================================================================
 
+                debug("2. Config object created.");
+
                 if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
-                    showStatusMessage("Firebase is not configured. Please add your credentials.");
+                    const msg = "Firebase is not configured. Please add your credentials.";
+                    showStatusMessage(msg);
+                    debug(`Error: ${msg}`);
                     return;
                 }
+                debug("3. Config is valid.");
+
                 const app = initializeApp(firebaseConfig);
+                debug("4. Firebase app initialized.");
+
                 db = getFirestore(app);
+                debug("5. Firestore instance created.");
+
                 auth = getAuth(app);
-                onAuthStateChanged(auth, user => console.log(user ? `Signed in: ${user.uid}` : "Signed out."));
+                debug("6. Auth instance created.");
+
                 await signInAnonymously(auth);
+                debug("7. Signed in anonymously.");
+
+                showStatusMessage("Database connected successfully!", false);
 
             } catch (error) {
                 console.error("Firebase Initialization Error:", error);
-                showStatusMessage("Could not connect to the database.");
+                const msg = "Could not connect to the database. Check console for details.";
+                showStatusMessage(msg);
+                debug(`Error during initialization: ${error.message}`);
             }
         };
 
@@ -362,7 +374,6 @@
             }
             
             if (finalW && finalH) {
-                // We always round down for the final value, but formatFraction will display it cleanly.
                 DOMElements.finalSizeSpan.textContent = `${formatFraction(roundToEighth(finalW))}" × ${formatFraction(roundToEighth(finalH))}"`;
                 DOMElements.finalSizeDisplay.classList.remove('hidden');
             } else {
@@ -414,10 +425,9 @@
                 await addDoc(collection(db, collectionPath), { ...newWindow, createdAt: serverTimestamp() });
                 showStatusMessage("Window saved successfully!", false);
                 
-                // Clear form for next entry
                 DOMElements.locationInput.value = '';
                 DOMElements.typeSelect.value = '';
-                DOMElements.typeSelect.dispatchEvent(new Event('change')); // Reset UI
+                DOMElements.typeSelect.dispatchEvent(new Event('change'));
                 DOMElements.locationInput.focus();
             } catch (error) {
                 console.error("Error adding document: ", error);
@@ -449,13 +459,12 @@
                 if (isSimple) {
                     return [
                         w.location, w.type,
-                        '', '', '', '', '', '', // Empty placeholders for detailed measurements
+                        '', '', '', '', '', '',
                         formatFraction(w.finalW),
                         formatFraction(w.finalH),
                         w.notes || ''
                     ];
                 } else {
-                    // Ensure widths and heights are arrays before mapping
                     const widths = Array.isArray(w.widths) ? w.widths : [];
                     const heights = Array.isArray(w.heights) ? w.heights : [];
                     return [
@@ -510,7 +519,6 @@
             DOMElements.simpleMeasurementContainer.classList.toggle('hidden', !isSimple);
             DOMElements.detailedMeasurementContainer.classList.toggle('hidden', !isDetailed);
             
-            // Clear all inputs on type change to prevent data mix-up
             [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields].forEach(id => document.getElementById(id).value = '');
             DOMElements.notesInput.value = '';
             DOMElements.notesSimpleInput.value = '';
@@ -532,7 +540,6 @@
                 el.addEventListener('blur', () => {
                     const val = parseFractionInput(el.value);
                     if (!isNaN(val)) {
-                        // Display the clean fraction, but the underlying value is the raw decimal
                         el.value = formatFraction(val); 
                     }
                     calculateAndShowFinalSize();
