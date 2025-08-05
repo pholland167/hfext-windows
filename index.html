@@ -38,7 +38,7 @@
     <div class="container mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-[#9D2235]">H&F Exteriors</h1>
-            <p class="text-lg text-gray-600">Window Measurement App - v2.2</p>
+            <p class="text-lg text-gray-600">Window Measurement App - v2.3</p>
         </header>
 
         <!-- Status/Message Area to replace alerts -->
@@ -293,7 +293,7 @@
                 // =================================================================
                 // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
                 // =================================================================
-                const firebaseConfig = {
+             const firebaseConfig = {
   apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
   authDomain: "windows-measurments.firebaseapp.com",
   projectId: "windows-measurments",
@@ -480,8 +480,9 @@
             if (windows.length === 0) return showStatusMessage("No windows to export.");
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
             
+            // Main Header
             doc.setFontSize(20);
             doc.setTextColor('#9D2235');
             doc.text('H&F Exteriors - Window Measurement Report', doc.internal.pageSize.getWidth() / 2, 40, { align: 'center' });
@@ -490,33 +491,69 @@
             doc.text(`PO Number: ${currentPoNumber}`, 40, 60);
             doc.text(`Date: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() - 40, 60, { align: 'right' });
 
-            const head = [['Location', 'Type', 'Transom Shape', 'Transom H', 'Width Top', 'Width Mid', 'Width Bot', 'Height Left', 'Height Ctr', 'Height Right', 'Final Width', 'Final Height', 'Notes']];
-            
-            const body = windows.map(w => {
-                const widths = Array.isArray(w.widths) ? w.widths : [];
-                const heights = Array.isArray(w.heights) ? w.heights : [];
-                return [
-                    w.location, w.type,
-                    w.transomShape || '',
-                    formatFraction(w.transomHeight),
-                    ...widths.map(formatFraction),
-                    ...heights.map(formatFraction),
-                    formatFraction(w.finalW),
-                    formatFraction(w.finalH),
-                    w.notes || ''
-                ];
-            });
+            let y = 90; // Starting Y position for the first block
+            const pageHeight = doc.internal.pageSize.height;
+            const bottomMargin = 40;
 
-            doc.autoTable({
-                startY: 80, head, body, theme: 'grid',
-                headStyles: { fillColor: [157, 34, 53], textColor: 255, fontStyle: 'bold' },
-                styles: { fontSize: 8, cellPadding: 4 },
-                columnStyles: {
-                    0: { fontStyle: 'bold' },
-                    10: { fontStyle: 'bold', textColor: [0, 100, 0] },
-                    11: { fontStyle: 'bold', textColor: [0, 100, 0] },
-                    12: { cellWidth: 'auto' }
+            windows.forEach((w, index) => {
+                const blockHeight = 150; // Estimated height for each block
+                if (y + blockHeight > pageHeight - bottomMargin) {
+                    doc.addPage();
+                    y = 40; // Reset Y for new page
                 }
+
+                // Block Header
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(w.location, 40, y);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Type: ${w.type}`, 45, y + 18);
+                
+                // Final Size - Most Important
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Final Size: ${formatFraction(w.finalW)}" × ${formatFraction(w.finalH)}"`, doc.internal.pageSize.getWidth() / 2, y + 45, { align: 'center' });
+                
+                y += 65;
+
+                // Transom Info
+                if (w.transomHeight) {
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Transom:', 45, y);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`${w.transomShape} - ${formatFraction(w.transomHeight)}"`, 100, y);
+                    y += 15;
+                }
+
+                // Reference Measurements
+                if (w.widths && w.widths.length > 0) {
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Reference Measurements:', 45, y);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(9);
+                    const widthsText = `Widths (T/M/B):  ${w.widths.map(v => formatFraction(v) + '"').join(' / ')}`;
+                    const heightsText = `Heights (L/C/R): ${w.heights.map(v => formatFraction(v) + '"').join(' / ')}`;
+                    doc.text(widthsText, 55, y + 12);
+                    doc.text(heightsText, 55, y + 24);
+                    y += 30;
+                }
+
+                // Notes
+                if (w.notes) {
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'italic');
+                    const notesLines = doc.splitTextToSize(`Notes: ${w.notes}`, doc.internal.pageSize.getWidth() - 80);
+                    doc.text(notesLines, 45, y);
+                    y += (notesLines.length * 10) + 5;
+                }
+                
+                // Separator Line
+                doc.setDrawColor(200); // light gray
+                doc.line(40, y, doc.internal.pageSize.getWidth() - 40, y);
+                y += 20;
             });
 
             const fileName = `${currentPoNumber}_Window_Measurements.pdf`;
