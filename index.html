@@ -58,8 +58,6 @@
                 </button>
             </div>
             <p id="currentPoInfo" class="mt-4 text-sm text-gray-500">No PO inputted.</p>
-            <!-- Temporary Debugging Info Panel -->
-            <div id="debug-info" class="text-xs text-gray-400 text-left mt-4 p-2 border rounded-md bg-gray-50"></div>
         </div>
 
         <!-- Window Entry Form -->
@@ -195,7 +193,6 @@
             currentPoInfo: document.getElementById('currentPoInfo'),
             entryForm: document.getElementById('entryForm'),
             statusMessage: document.getElementById('statusMessage'),
-            debugInfo: document.getElementById('debug-info'),
             typeSelect: document.getElementById('type'),
             otherTypeWrapper: document.getElementById('otherTypeWrapper'),
             otherTypeInput: document.getElementById('otherType'),
@@ -256,53 +253,36 @@
         };
 
         const initializeFirebase = async () => {
-            const debug = (msg) => DOMElements.debugInfo.innerHTML += `${msg}<br>`;
             try {
-                debug("1. Initializing Firebase...");
-                
                 // =================================================================
                 // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
                 // =================================================================
-              const firebaseConfig = {
-    apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
-    authDomain: "windows-measurments.firebaseapp.com",
-    projectId: "windows-measurments",
-    storageBucket: "windows-measurments.firebasestorage.app",
-    messagingSenderId: "871418252288",
-    appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
-    measurementId: "G-1HPL56D6JT"
-  };
+               const firebaseConfig = {
+  apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
+  authDomain: "windows-measurments.firebaseapp.com",
+  projectId: "windows-measurments",
+  storageBucket: "windows-measurments.firebasestorage.app",
+  messagingSenderId: "871418252288",
+  appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
+  measurementId: "G-1HPL56D6JT"
+};
                 // =================================================================
 
-                debug("2. Config object created.");
-
                 if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
-                    const msg = "Firebase is not configured. Please add your credentials.";
-                    showStatusMessage(msg);
-                    debug(`Error: ${msg}`);
+                    showStatusMessage("Firebase is not configured. Please add your credentials.");
                     return;
                 }
-                debug("3. Config is valid.");
-
+                
                 const app = initializeApp(firebaseConfig);
-                debug("4. Firebase app initialized.");
-
                 db = getFirestore(app);
-                debug("5. Firestore instance created.");
-
                 auth = getAuth(app);
-                debug("6. Auth instance created.");
-
+                
                 await signInAnonymously(auth);
-                debug("7. Signed in anonymously.");
-
                 showStatusMessage("Database connected successfully!", false);
 
             } catch (error) {
                 console.error("Firebase Initialization Error:", error);
-                const msg = "Could not connect to the database. Check console for details.";
-                showStatusMessage(msg);
-                debug(`Error during initialization: ${error.message}`);
+                showStatusMessage(`Connection Error: ${error.message}`);
             }
         };
 
@@ -329,7 +309,7 @@
                 showStatusMessage(`Successfully loaded PO: ${currentPoNumber}`, false);
             }, (error) => {
                 console.error("Error fetching PO data: ", error);
-                showStatusMessage("Error fetching data for this PO.");
+                showStatusMessage("Error loading data. Check Firestore rules and network.");
                 DOMElements.loadingIcon.classList.add('hidden');
                 DOMElements.loadPoBtn.disabled = false;
             });
@@ -540,7 +520,8 @@
                 el.addEventListener('blur', () => {
                     const val = parseFractionInput(el.value);
                     if (!isNaN(val)) {
-                        el.value = formatFraction(val); 
+                        // Apply the round-down logic before formatting for display
+                        el.value = formatFraction(roundToEighth(val)); 
                     }
                     calculateAndShowFinalSize();
                 });
