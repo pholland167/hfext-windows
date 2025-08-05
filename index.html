@@ -38,7 +38,7 @@
     <div class="container mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-[#9D2235]">H&F Exteriors</h1>
-            <p class="text-lg text-gray-600">Window Measurement App - v2.15</p>
+            <p class="text-lg text-gray-600">Window Measurement App - v2.2</p>
         </header>
 
         <!-- Status/Message Area to replace alerts -->
@@ -93,6 +93,35 @@
                 
                 <!-- Detailed Measurements for standard windows -->
                 <div id="detailedMeasurementContainer" class="hidden">
+                    <!-- Transom Option -->
+                    <div id="transomOptionContainer" class="hidden md:col-span-2 border-b pb-4 mb-4">
+                        <div class="relative flex items-start">
+                            <div class="flex h-6 items-center">
+                                <input id="transomCheckbox" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-[#9D2235] focus:ring-[#9D2235]">
+                            </div>
+                            <div class="ml-3 text-sm leading-6">
+                                <label for="transomCheckbox" class="font-medium text-gray-900">Add Transom?</label>
+                            </div>
+                        </div>
+                        <div id="transomDetailsWrapper" class="hidden mt-4 space-y-4">
+                            <div>
+                                <label for="transomShape" class="block text-sm font-medium text-gray-600 mb-1">Transom Shape</label>
+                                <select id="transomShape" class="w-full md:w-1/3 px-2 py-2 border border-gray-300 rounded-lg">
+                                    <option>Rectangular</option>
+                                    <option>Half-Round</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div id="otherTransomShapeWrapper" class="hidden">
+                                <label for="otherTransomShape" class="block text-sm font-medium text-gray-600 mb-1">Specify Shape</label>
+                                <input type="text" id="otherTransomShape" placeholder="e.g. Elliptical" class="w-full md:w-1/3 px-2 py-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label for="transomHeight" class="block text-sm font-medium text-gray-600 mb-1">Transom Height</label>
+                                <input type="text" id="transomHeight" inputmode="decimal" placeholder="e.g. 12 1/8" class="w-full md:w-1/3 px-2 py-2 text-center border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         <div>
                             <h3 class="text-lg font-medium text-gray-700 mb-2">Detailed Measurements</h3>
@@ -199,6 +228,13 @@
             measurementContainer: document.getElementById('measurementContainer'),
             detailedMeasurementContainer: document.getElementById('detailedMeasurementContainer'),
             simpleMeasurementContainer: document.getElementById('simpleMeasurementContainer'),
+            transomOptionContainer: document.getElementById('transomOptionContainer'),
+            transomCheckbox: document.getElementById('transomCheckbox'),
+            transomDetailsWrapper: document.getElementById('transomDetailsWrapper'),
+            transomShapeSelect: document.getElementById('transomShape'),
+            otherTransomShapeWrapper: document.getElementById('otherTransomShapeWrapper'),
+            otherTransomShapeInput: document.getElementById('otherTransomShape'),
+            transomHeightInput: document.getElementById('transomHeight'),
             finalSizeDisplay: document.getElementById('finalSizeDisplay'),
             finalSizeSpan: document.getElementById('finalSize'),
             addWindowBtn: document.getElementById('addWindowBtn'),
@@ -257,7 +293,7 @@
                 // =================================================================
                 // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
                 // =================================================================
-               const firebaseConfig = {
+                const firebaseConfig = {
   apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
   authDomain: "windows-measurments.firebaseapp.com",
   projectId: "windows-measurments",
@@ -319,18 +355,25 @@
             const { entriesContainer, generatePDFBtn } = DOMElements;
             entriesContainer.innerHTML = windows.length === 0 
                 ? '<p class="text-gray-500">No windows added yet for this PO.</p>'
-                : windows.map(w => `
+                : windows.map(w => {
+                    let transomInfo = '';
+                    if (w.transomHeight) {
+                        const shape = w.transomShape || '';
+                        transomInfo = `<p class="text-sm text-gray-600 font-medium">Transom: ${shape} - ${formatFraction(w.transomHeight)}"</p>`;
+                    }
+                    return `
                     <div class="bg-gray-50 border-l-4 border-[#9D2235] p-4 rounded-r-md shadow-sm">
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="font-bold text-lg text-gray-800">${w.location}</p>
                                 <p class="text-sm text-gray-600">${w.type}</p>
+                                ${transomInfo}
                             </div>
                             <p class="font-bold text-xl text-[#9D2235]">${formatFraction(w.finalW)}" × ${formatFraction(w.finalH)}"</p>
                         </div>
                         ${w.notes ? `<p class="mt-2 text-sm text-gray-500 italic">Notes: ${w.notes}</p>` : ''}
                     </div>
-                `).join('');
+                `}).join('');
             generatePDFBtn.disabled = windows.length === 0;
         };
 
@@ -380,15 +423,30 @@
                 newWindow = {
                     location, type,
                     notes: DOMElements.notesSimpleInput.value.trim(),
-                    widths: [], heights: [],
+                    widths: [], heights: [], transomHeight: null, transomShape: null,
                     finalW: roundToEighth(w), finalH: roundToEighth(h)
                 };
             } else {
                 const values = DOMElements.detailedMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
                 if (values.some(v => isNaN(v) || !(v > 0))) return showStatusMessage("Please fill all measurement fields.");
+                
+                let transomHeight = null;
+                let transomShape = null;
+                if (DOMElements.transomCheckbox.checked) {
+                    const th = parseFractionInput(DOMElements.transomHeightInput.value);
+                    if (isNaN(th) || !(th > 0)) return showStatusMessage("Please enter a valid Transom Height.");
+                    transomHeight = roundToEighth(th);
+
+                    transomShape = DOMElements.transomShapeSelect.value;
+                    if (transomShape === 'Other') {
+                        transomShape = DOMElements.otherTransomShapeInput.value.trim();
+                        if (!transomShape) return showStatusMessage("Please specify the 'Other' transom shape.");
+                    }
+                }
+
                 const rounded = values.map(roundToEighth);
                 newWindow = {
-                    location, type,
+                    location, type, transomHeight, transomShape,
                     notes: DOMElements.notesInput.value.trim(),
                     widths: rounded.slice(0, 3),
                     heights: rounded.slice(3, 6),
@@ -432,41 +490,32 @@
             doc.text(`PO Number: ${currentPoNumber}`, 40, 60);
             doc.text(`Date: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.getWidth() - 40, 60, { align: 'right' });
 
-            const head = [['Location', 'Type', 'Width Top', 'Width Mid', 'Width Bot', 'Height Left', 'Height Ctr', 'Height Right', 'Final Width', 'Final Height', 'Notes']];
+            const head = [['Location', 'Type', 'Transom Shape', 'Transom H', 'Width Top', 'Width Mid', 'Width Bot', 'Height Left', 'Height Ctr', 'Height Right', 'Final Width', 'Final Height', 'Notes']];
             
             const body = windows.map(w => {
-                const isSimple = ['Round', 'Half-Round'].includes(w.type);
-                if (isSimple) {
-                    return [
-                        w.location, w.type,
-                        '', '', '', '', '', '',
-                        formatFraction(w.finalW),
-                        formatFraction(w.finalH),
-                        w.notes || ''
-                    ];
-                } else {
-                    const widths = Array.isArray(w.widths) ? w.widths : [];
-                    const heights = Array.isArray(w.heights) ? w.heights : [];
-                    return [
-                        w.location, w.type,
-                        ...widths.map(formatFraction),
-                        ...heights.map(formatFraction),
-                        formatFraction(w.finalW),
-                        formatFraction(w.finalH),
-                        w.notes || ''
-                    ];
-                }
+                const widths = Array.isArray(w.widths) ? w.widths : [];
+                const heights = Array.isArray(w.heights) ? w.heights : [];
+                return [
+                    w.location, w.type,
+                    w.transomShape || '',
+                    formatFraction(w.transomHeight),
+                    ...widths.map(formatFraction),
+                    ...heights.map(formatFraction),
+                    formatFraction(w.finalW),
+                    formatFraction(w.finalH),
+                    w.notes || ''
+                ];
             });
 
             doc.autoTable({
                 startY: 80, head, body, theme: 'grid',
                 headStyles: { fillColor: [157, 34, 53], textColor: 255, fontStyle: 'bold' },
-                styles: { fontSize: 9, cellPadding: 4 },
+                styles: { fontSize: 8, cellPadding: 4 },
                 columnStyles: {
                     0: { fontStyle: 'bold' },
-                    8: { fontStyle: 'bold', textColor: [0, 100, 0] },
-                    9: { fontStyle: 'bold', textColor: [0, 100, 0] },
-                    10: { cellWidth: 'auto' }
+                    10: { fontStyle: 'bold', textColor: [0, 100, 0] },
+                    11: { fontStyle: 'bold', textColor: [0, 100, 0] },
+                    12: { cellWidth: 'auto' }
                 }
             });
 
@@ -490,6 +539,7 @@
             const isOther = type === 'Other';
             const isSimple = ['Round', 'Half-Round'].includes(type);
             const isDetailed = ['Single Hung', 'Double Hung', 'Picture', 'Casement', 'Other'].includes(type);
+            const showTransomOption = ['Single Hung', 'Double Hung', 'Picture', 'Casement'].includes(type);
 
             DOMElements.otherTypeWrapper.classList.toggle('hidden', !isOther);
             DOMElements.otherTypeInput.required = isOther;
@@ -498,8 +548,17 @@
             DOMElements.measurementContainer.classList.toggle('hidden', !type);
             DOMElements.simpleMeasurementContainer.classList.toggle('hidden', !isSimple);
             DOMElements.detailedMeasurementContainer.classList.toggle('hidden', !isDetailed);
+            DOMElements.transomOptionContainer.classList.toggle('hidden', !showTransomOption);
             
-            [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields].forEach(id => document.getElementById(id).value = '');
+            // Clear all inputs on type change
+            [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields, 'transomHeight', 'otherTransomShape'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            DOMElements.transomCheckbox.checked = false;
+            DOMElements.transomDetailsWrapper.classList.add('hidden');
+            DOMElements.otherTransomShapeWrapper.classList.add('hidden');
+            DOMElements.transomShapeSelect.value = 'Rectangular';
             DOMElements.notesInput.value = '';
             DOMElements.notesSimpleInput.value = '';
             DOMElements.otherTypeInput.value = '';
@@ -513,18 +572,36 @@
             DOMElements.generatePDFBtn.addEventListener('click', generatePDF);
             DOMElements.typeSelect.addEventListener('change', handleTypeChange);
             
-            const allMeasurementFields = [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields];
+            DOMElements.transomCheckbox.addEventListener('change', () => {
+                const isChecked = DOMElements.transomCheckbox.checked;
+                DOMElements.transomDetailsWrapper.classList.toggle('hidden', !isChecked);
+                if (!isChecked) {
+                    DOMElements.transomHeightInput.value = '';
+                    DOMElements.transomShapeSelect.value = 'Rectangular';
+                    DOMElements.otherTransomShapeInput.value = '';
+                    DOMElements.otherTransomShapeWrapper.classList.add('hidden');
+                }
+            });
+
+            DOMElements.transomShapeSelect.addEventListener('change', () => {
+                const isOther = DOMElements.transomShapeSelect.value === 'Other';
+                DOMElements.otherTransomShapeWrapper.classList.toggle('hidden', !isOther);
+                if (!isOther) DOMElements.otherTransomShapeInput.value = '';
+            });
+            
+            const allMeasurementFields = [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields, 'transomHeight'];
             allMeasurementFields.forEach(id => {
                 const el = document.getElementById(id);
-                el.addEventListener('input', calculateAndShowFinalSize);
-                el.addEventListener('blur', () => {
-                    const val = parseFractionInput(el.value);
-                    if (!isNaN(val)) {
-                        // Apply the round-down logic before formatting for display
-                        el.value = formatFraction(roundToEighth(val)); 
-                    }
-                    calculateAndShowFinalSize();
-                });
+                if (el) {
+                    el.addEventListener('input', calculateAndShowFinalSize);
+                    el.addEventListener('blur', () => {
+                        const val = parseFractionInput(el.value);
+                        if (!isNaN(val)) {
+                            el.value = formatFraction(roundToEighth(val)); 
+                        }
+                        calculateAndShowFinalSize();
+                    });
+                }
             });
         });
 
