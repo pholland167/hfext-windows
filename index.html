@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H&F Exteriors - Window Measurement App</title>
-    <!-- Using Tailwind CSS for a modern, responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Using jsPDF and jsPDF-AutoTable for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <!-- Google Fonts for better typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,10 +38,8 @@
             <p class="text-lg text-gray-600">Window Measurement App - v2.5</p>
         </header>
 
-        <!-- Status/Message Area to replace alerts -->
         <div id="statusMessage" class="hidden p-4 mb-6 text-center text-white rounded-lg transition-all duration-300"></div>
 
-        <!-- PO Loading Section -->
         <div class="bg-white p-6 rounded-xl shadow-md mb-8">
             <h2 class="text-xl font-semibold mb-4 text-gray-700">1. Input PO</h2>
             <div class="flex flex-col sm:flex-row gap-4">
@@ -60,11 +55,9 @@
             <p id="currentPoInfo" class="mt-4 text-sm text-gray-500">No PO inputted.</p>
         </div>
 
-        <!-- Window Entry Form -->
         <div id="entryForm" class="bg-white p-6 rounded-xl shadow-md mb-8 opacity-50 pointer-events-none">
             <h2 class="text-xl font-semibold mb-4 text-gray-700">2. Add a Window</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <!-- Location and Type are always visible after PO load -->
                 <div>
                     <label for="location" class="block text-sm font-medium text-gray-600 mb-1">Window Location *</label>
                     <input type="text" id="location" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
@@ -75,7 +68,7 @@
                         <option value="">Select Window Type</option>
                         <option>Single Hung</option>
                         <option>Double Hung</option>
-                        <option>Picture</option>
+                        <option>Slider</option> <option>Picture</option>
                         <option>Casement</option>
                         <option>Round</option>
                         <option>Half-Round</option>
@@ -88,12 +81,9 @@
                 </div>
             </div>
 
-            <!-- Measurement section, hidden until a type is selected -->
             <div id="measurementContainer" class="hidden mt-6 border-t pt-6">
                 
-                <!-- Detailed Measurements for standard windows -->
                 <div id="detailedMeasurementContainer" class="hidden">
-                    <!-- Transom Option -->
                     <div id="transomOptionContainer" class="hidden md:col-span-2 border-b pb-4 mb-4">
                         <div class="relative flex items-start">
                             <div class="flex h-6 items-center">
@@ -161,7 +151,6 @@
                     </div>
                 </div>
 
-                <!-- Simple Measurements for Round/Half-Round windows -->
                 <div id="simpleMeasurementContainer" class="hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         <div>
@@ -184,7 +173,6 @@
                     </div>
                 </div>
                 
-                <!-- Common elements for all measurement types -->
                 <div id="finalSizeDisplay" class="md:col-span-2 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg hidden mt-4">
                     <p class="font-semibold">Calculated Final Size: <span id="finalSize" class="text-lg font-bold">-- × --</span></p>
                 </div>
@@ -192,7 +180,6 @@
             </div>
         </div>
         
-        <!-- Window Entries List -->
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-semibold mb-4 text-gray-700">3. Saved Windows</h2>
             <div id="entries" class="space-y-3">
@@ -202,7 +189,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -294,14 +280,14 @@
                 // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
                 // =================================================================
                 const firebaseConfig = {
-  apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
-  authDomain: "windows-measurments.firebaseapp.com",
-  projectId: "windows-measurments",
-  storageBucket: "windows-measurments.firebasestorage.app",
-  messagingSenderId: "871418252288",
-  appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
-  measurementId: "G-1HPL56D6JT"
-};
+     apiKey: "AIzaSyAPN6tazk0RkYa49XQgu6tAAHY_EF8XW8M",
+     authDomain: "windows-measurments.firebaseapp.com",
+     projectId: "windows-measurments",
+     storageBucket: "windows-measurments.firebasestorage.app",
+     messagingSenderId: "871418252288",
+     appId: "1:871418252288:web:e250ae0a75764e9b405ce5",
+     measurementId: "G-1HPL56D6JT"
+    };
                 // =================================================================
 
                 if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
@@ -415,7 +401,7 @@
             if (!location || !type) return showStatusMessage("Please provide a location and window type.");
 
             let newWindow;
-            const isSimple = ['Round', 'Half-Round'].includes(type);
+            const isSimple = ['Round', 'Half-Round'].includes(DOMElements.typeSelect.value); // Use original select value
 
             if (isSimple) {
                 const [w, h] = DOMElements.simpleMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
@@ -623,8 +609,10 @@
             const type = DOMElements.typeSelect.value;
             const isOther = type === 'Other';
             const isSimple = ['Round', 'Half-Round'].includes(type);
-            const isDetailed = ['Single Hung', 'Double Hung', 'Picture', 'Casement', 'Other'].includes(type);
-            const showTransomOption = ['Single Hung', 'Double Hung', 'Picture', 'Casement'].includes(type);
+            // CHANGED: Added 'Slider' to this array
+            const isDetailed = ['Single Hung', 'Double Hung', 'Slider', 'Picture', 'Casement', 'Other'].includes(type);
+            // CHANGED: Added 'Slider' to this array
+            const showTransomOption = ['Single Hung', 'Double Hung', 'Slider', 'Picture', 'Casement'].includes(type);
 
             DOMElements.otherTypeWrapper.classList.toggle('hidden', !isOther);
             DOMElements.otherTypeInput.required = isOther;
