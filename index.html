@@ -107,40 +107,124 @@
                                 <input type="text" id="otherTransomShape" placeholder="e.g. Elliptical" class="w-full md:w-1/3 px-2 py-2 border border-gray-300 rounded-lg">
                             </div>
                             <div>
-                                <label for="transomHeight" class="block text-sm font-medium text-gray-600 mb-1">Transom Height</label>
-                                <input type="text" id="transomHeight" inputmode="decimal" placeholder="e.g. 12 1/8" class="w-full md:w-1/3 px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Transom Height</label>
+                                <div class="flex gap-2 w-full md:w-2/3">
+                                    <input type="number" id="transomHeight" inputmode="numeric" placeholder="12" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                    <select id="transomHeightFrac" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg">
+                                        <option value="0">0</option>
+                                        <option value="0.125">1/8</option>
+                                        <option value="0.25">1/4</option>
+                                        <option value="0.375">3/8</option>
+                                        <option value="0.5">1/2</option>
+                                        <option value="0.625">5/8</option>
+                                        <option value="0.75">3/4</option>
+                                        <option value="0.875">7/8</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         <div>
                             <h3 class="text-lg font-medium text-gray-700 mb-2">Detailed Measurements</h3>
-                            <div class="grid grid-cols-3 gap-x-4">
+                            <div class="grid grid-cols-3 gap-x-2">
                                 <div>
-                                    <label for="widthTop" class="block text-sm font-medium text-gray-600 mb-1">Width Top</label>
-                                    <input type="text" id="widthTop" inputmode="decimal" placeholder="e.g. 35 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Width Top</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="widthTop" inputmode="numeric" placeholder="35" class="w-full px-1 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="widthTopFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="widthMiddle" class="block text-sm font-medium text-gray-600 mb-1">Width Middle</label>
-                                    <input type="text" id="widthMiddle" inputmode="decimal" placeholder="e.g. 35 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Width Middle</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="widthMiddle" inputmode="numeric" placeholder="35" class="w-full px-1 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="widthMiddleFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="widthBottom" class="block text-sm font-medium text-gray-600 mb-1">Width Bottom</label>
-                                    <input type="text" id="widthBottom" inputmode="decimal" placeholder="e.g. 35 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Width Bottom</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="widthBottom" inputmode="numeric" placeholder="35" class="w-full px-1 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="widthBottomFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                             <div class="grid grid-cols-3 gap-x-4 mt-4">
+                             <div class="grid grid-cols-3 gap-x-2 mt-4">
                                 <div>
-                                    <label for="heightLeft" class="block text-sm font-medium text-gray-600 mb-1">Height Left</label>
-                                    <input type="text" id="heightLeft" inputmode="decimal" placeholder="e.g. 52 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Height Left</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="heightLeft" inputmode="numeric" placeholder="52" class="w-full px-1 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="heightLeftFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="heightCenter" class="block text-sm font-medium text-gray-600 mb-1">Height Center</label>
-                                    <input type="text" id="heightCenter" inputmode="decimal" placeholder="e.g. 52 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Height Center</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="heightCenter" inputmode="numeric" placeholder="52" class="w-full px-1 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="heightCenterFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="heightRight" class="block text-sm font-medium text-gray-600 mb-1">Height Right</label>
-                                    <input type="text" id="heightRight" inputmode="decimal" placeholder="e.g. 52 1/8" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Height Right</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="heightRight" inputmode="numeric" placeholder="52" class="w-full px-1 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="heightRightFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -157,12 +241,36 @@
                             <h3 class="text-lg font-medium text-gray-700 mb-2">Overall Measurements</h3>
                              <div class="grid grid-cols-2 gap-x-4">
                                 <div>
-                                    <label for="widthSimple" class="block text-sm font-medium text-gray-600 mb-1">Width</label>
-                                    <input type="text" id="widthSimple" inputmode="decimal" placeholder="e.g. 36" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Width</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="widthSimple" inputmode="numeric" placeholder="36" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="widthSimpleFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="heightSimple" class="block text-sm font-medium text-gray-600 mb-1">Height</label>
-                                    <input type="text" id="heightSimple" inputmode="decimal" placeholder="e.g. 36" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Height</label>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="heightSimple" inputmode="numeric" placeholder="36" class="w-full px-2 py-2 text-center border border-gray-300 rounded-lg" min="0" step="1">
+                                        <select id="heightSimpleFrac" class="w-full px-1 py-2 text-sm border border-gray-300 rounded-lg">
+                                            <option value="0">0</option>
+                                            <option value="0.125">1/8</option>
+                                            <option value="0.25">1/4</option>
+                                            <option value="0.375">3/8</option>
+                                            <option value="0.5">1/2</option>
+                                            <option value="0.625">5/8</option>
+                                            <option value="0.75">3/4</option>
+                                            <option value="0.875">7/8</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -249,6 +357,20 @@
                 if (!isNaN(num) && !isNaN(den) && den !== 0) total += num / den;
             }
             return isNaN(total) ? NaN : total;
+        };
+
+        // Helper function to get combined value from split inputs (whole + fraction)
+        const getSplitInputValue = (baseId) => {
+            const wholeInput = document.getElementById(baseId);
+            const fracSelect = document.getElementById(baseId + 'Frac');
+
+            if (!wholeInput || !fracSelect) return NaN;
+
+            const wholeValue = parseFloat(wholeInput.value) || 0;
+            const fracValue = parseFloat(fracSelect.value) || 0;
+
+            const total = wholeValue + fracValue;
+            return (wholeValue === 0 && fracValue === 0) ? NaN : total;
         };
 
         const roundToEighth = (num) => Math.floor(num * 8) / 8;
@@ -368,20 +490,20 @@
             let finalW, finalH;
 
             if (['Round', 'Half-Round'].includes(type)) {
-                const [w, h] = DOMElements.simpleMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                const [w, h] = DOMElements.simpleMeasurementFields.map(id => getSplitInputValue(id));
                 if (!isNaN(w) && w > 0 && !isNaN(h) && h > 0) {
                     finalW = w;
                     finalH = h;
                 }
             } else {
-                const values = DOMElements.detailedMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                const values = DOMElements.detailedMeasurementFields.map(id => getSplitInputValue(id));
                 if (values.every(v => !isNaN(v) && v > 0)) {
                     const rounded = values.map(roundToEighth);
                     finalW = Math.min(...rounded.slice(0, 3));
                     finalH = Math.min(...rounded.slice(3, 6));
                 }
             }
-            
+
             if (finalW && finalH) {
                 DOMElements.finalSizeSpan.textContent = `${formatFraction(roundToEighth(finalW))}" × ${formatFraction(roundToEighth(finalH))}"`;
                 DOMElements.finalSizeDisplay.classList.remove('hidden');
@@ -404,7 +526,7 @@
             const isSimple = ['Round', 'Half-Round'].includes(DOMElements.typeSelect.value); // Use original select value
 
             if (isSimple) {
-                const [w, h] = DOMElements.simpleMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                const [w, h] = DOMElements.simpleMeasurementFields.map(id => getSplitInputValue(id));
                 if (isNaN(w) || !(w > 0) || isNaN(h) || !(h > 0)) return showStatusMessage("Please enter valid width and height.");
                 newWindow = {
                     location, type,
@@ -413,13 +535,13 @@
                     finalW: roundToEighth(w), finalH: roundToEighth(h)
                 };
             } else {
-                const values = DOMElements.detailedMeasurementFields.map(id => parseFractionInput(document.getElementById(id).value));
+                const values = DOMElements.detailedMeasurementFields.map(id => getSplitInputValue(id));
                 if (values.some(v => isNaN(v) || !(v > 0))) return showStatusMessage("Please fill all measurement fields.");
-                
+
                 let transomHeight = null;
                 let transomShape = null;
                 if (DOMElements.transomCheckbox.checked) {
-                    const th = parseFractionInput(DOMElements.transomHeightInput.value);
+                    const th = getSplitInputValue('transomHeight');
                     if (isNaN(th) || !(th > 0)) return showStatusMessage("Please enter a valid Transom Height.");
                     transomHeight = roundToEighth(th);
 
@@ -623,11 +745,16 @@
             DOMElements.detailedMeasurementContainer.classList.toggle('hidden', !isDetailed);
             DOMElements.transomOptionContainer.classList.toggle('hidden', !showTransomOption);
             
-            // Clear all inputs on type change
-            [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields, 'transomHeight', 'otherTransomShape'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
+            // Clear all inputs on type change (both whole and fraction inputs)
+            [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields, 'transomHeight'].forEach(id => {
+                const wholeEl = document.getElementById(id);
+                const fracEl = document.getElementById(id + 'Frac');
+                if (wholeEl) wholeEl.value = '';
+                if (fracEl) fracEl.value = '0';
             });
+            const otherTransomShapeEl = document.getElementById('otherTransomShape');
+            if (otherTransomShapeEl) otherTransomShapeEl.value = '';
+
             DOMElements.transomCheckbox.checked = false;
             DOMElements.transomDetailsWrapper.classList.add('hidden');
             DOMElements.otherTransomShapeWrapper.classList.add('hidden');
@@ -650,6 +777,8 @@
                 DOMElements.transomDetailsWrapper.classList.toggle('hidden', !isChecked);
                 if (!isChecked) {
                     DOMElements.transomHeightInput.value = '';
+                    const transomFracEl = document.getElementById('transomHeightFrac');
+                    if (transomFracEl) transomFracEl.value = '0';
                     DOMElements.transomShapeSelect.value = 'Rectangular';
                     DOMElements.otherTransomShapeInput.value = '';
                     DOMElements.otherTransomShapeWrapper.classList.add('hidden');
@@ -662,18 +791,18 @@
                 if (!isOther) DOMElements.otherTransomShapeInput.value = '';
             });
             
+            // Add event listeners for both whole and fraction inputs
             const allMeasurementFields = [...DOMElements.detailedMeasurementFields, ...DOMElements.simpleMeasurementFields, 'transomHeight'];
             allMeasurementFields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.addEventListener('input', calculateAndShowFinalSize);
-                    el.addEventListener('blur', () => {
-                        const val = parseFractionInput(el.value);
-                        if (!isNaN(val)) {
-                            el.value = formatFraction(roundToEighth(val)); 
-                        }
-                        calculateAndShowFinalSize();
-                    });
+                const wholeEl = document.getElementById(id);
+                const fracEl = document.getElementById(id + 'Frac');
+
+                if (wholeEl) {
+                    wholeEl.addEventListener('input', calculateAndShowFinalSize);
+                    wholeEl.addEventListener('change', calculateAndShowFinalSize);
+                }
+                if (fracEl) {
+                    fracEl.addEventListener('change', calculateAndShowFinalSize);
                 }
             });
         });
